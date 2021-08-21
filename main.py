@@ -2,7 +2,7 @@ import json
 import codecs
 import datetime
 import time
-from os import path, getenv, remove
+from os import path, getenv, remove, mkdir
 from datetime import datetime
 import glob
 import logging
@@ -24,6 +24,8 @@ except ImportError:
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
+LOGS_PATH = "logs/"
+
 load_dotenv()
 
 
@@ -39,6 +41,7 @@ class Instagram:
         self.users = []
 
     def run(self):
+        self.logs_dir()
         self.login()
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
         if self.expired_lists():
@@ -52,24 +55,28 @@ class Instagram:
 
     def unfollow_method(self):
         to_unfollow_list = self.fetch_users_from_file(self.expired_follows_file)
+
         # While there are user to unfollow
         while len(to_unfollow_list) != 0:
             # Get the first user from the list
             user = to_unfollow_list[0]
             if user not in self.my_followers:
-                # Do only 30 unfollows per session
+
+                # Reached 30 actions a session
                 if self.actions == 30:
                     print("Reached 30 unfollows.")
                     # Save the rest of users to original file
                     self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
                     break
-                # Unfollow a user
+
+                # Or unfollow a user
                 elif self.unfollow_user(user):
                     self.actions += 1
                     time.sleep(1)
                     # Successful unfollow
                     to_unfollow_list.remove(user)
-                # Actions limit reached
+
+                # Or actions limited by instagram
                 else:
                     # Save the rest of users to original file
                     self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
@@ -86,11 +93,12 @@ class Instagram:
 
     def follow_method(self):
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
-
         to_follow = self.fetch_followers("soulhoe")
+
         print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
         print(f"Num of users to follow: {len(to_follow)}")
         exit()
+
         for user in to_follow:
             try:
                 if self.follow_user(user["username"]):
@@ -208,6 +216,7 @@ class Instagram:
         # Get user_id
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
+
         # Follow by user_id
         r = self.api.friendships_create(user_id)
         if r["status"] == "ok":
@@ -222,6 +231,7 @@ class Instagram:
         # Get user_id
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
+
         # Unfollow by user_id
         r = self.api.friendships_destroy(user_id)
         if r["status"] == "ok":
@@ -253,7 +263,6 @@ class Instagram:
             print(f"[IG] Liking posts for {username}...")
             posts = updates[::3]
             for post in posts:
-                # print(post["pk"], post["id"])
                 # Like post
                 self.api.post_like(post["id"])
                 self.actions += 1
@@ -288,16 +297,17 @@ class Instagram:
 
         # Save to unfollow list
         if unfollow:
-            with open(f"{date}.txt", mode="a") as file:
+            with open(LOGS_PATH + f"{date}.txt", mode="a") as file:
                 file.write(f"{username}\n")
 
         # Save to ignore list
         if ignore:
-            with open(f"to_ignore.txt", mode="a") as file:
+            with open(LOGS_PATH + "to_ignore.txt", mode="a") as file:
                 file.write(f"{username}\n")
 
     def export_to_unfollow(self, usernames, filename):
         """Saves remaining usernames waiting for unfollow to the original file."""
+        filename = LOGS_PATH + filename
         with open(filename, mode="w") as file:
             file.write('\n'.join(usernames))
             file.write('\n')
@@ -305,7 +315,7 @@ class Instagram:
     def expired_lists(self):
         """Checks if there are lists atleast 4 days old to unfollow."""
         date_today = datetime.now()
-        filenames = [file.split(".")[0] for file in glob.glob("*.txt")]
+        filenames = [file[5:-4] for file in glob.glob(LOGS_PATH + "*.txt")]
 
         for date in filenames:
 
@@ -325,16 +335,19 @@ class Instagram:
 
     def fetch_users_from_file(self, filename):
         """Grabs all usernames from a file and returns them as a list."""
+        filename = LOGS_PATH + filename
         if path.exists(filename):
             with open(filename, "r") as f:
                 output = [line.strip() for line in f.readlines()]
         else:
             print(f"The file '{filename}' doesn't exist.")
+            return
 
         return output
 
     def remove_finished_file(self, filename):
         """Remove list."""
+        filename = LOGS_PATH + filename
         if path.exists(filename):
             remove(filename)
         else:
@@ -345,8 +358,15 @@ class Instagram:
         today = datetime.now()
         date = today.strftime("%d-%m-%YT%H:%M:00")
 
-        with open("actions_log.txt", "a") as f:
+        with open(LOGS_PATH + "actions_log.txt", "a") as f:
             f.write(f"Date: {date}, Method: {method}, Actions: {self.actions}\n")
+
+    def logs_dir(self):
+        if path.exists(LOGS_PATH):
+            pass
+        else:
+            mkdir(LOGS_PATH)
+            print("Logs directory created.")
 
     def to_json(self, python_object):
         if isinstance(python_object, bytes):
