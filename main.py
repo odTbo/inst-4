@@ -25,6 +25,7 @@ except ImportError:
         __version__ as client_version)
 
 LOGS_PATH = "logs/"
+TARGET_ACCOUNT = "zaperwave"
 
 load_dotenv()
 
@@ -37,8 +38,12 @@ class Instagram:
         self.to_ignore = set()
         self.my_followers = set()
         self.expired_follows_file = ""
-        self.actions = 0
         self.users = []
+        self.actions = {
+            "Follow": 0,
+            "Unfollow": 0,
+            "Post Like": 0
+        }
 
     def run(self):
         self.logs_dir()
@@ -71,7 +76,7 @@ class Instagram:
 
                 # Or unfollow a user
                 elif self.unfollow_user(user):
-                    self.actions += 1
+                    self.actions["Unfollow"] += 1
                     time.sleep(1)
                     # Successful unfollow
                     to_unfollow_list.remove(user)
@@ -93,7 +98,7 @@ class Instagram:
 
     def follow_method(self):
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
-        to_follow = self.fetch_followers("soulhoe")
+        to_follow = self.fetch_followers(TARGET_ACCOUNT)
 
         # print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
         print(f"Num of users to follow: {len(to_follow)}")
@@ -104,7 +109,7 @@ class Instagram:
                 if self.follow_user(user["username"]):
                     self.export_username(user["username"])
                     time.sleep(1)
-                    self.actions += 1
+                    self.actions["Follow"] += 1
                     self.like_posts(user["username"])
                     print("\n")
                 else:
@@ -265,7 +270,7 @@ class Instagram:
             for post in posts:
                 # Like post
                 self.api.post_like(post["id"])
-                self.actions += 1
+                self.actions["Post Like"] += 1
                 time.sleep(1)
             print(f"[IG] Liked {username}'s {len(posts)} posts.")
         else:
@@ -358,8 +363,13 @@ class Instagram:
         today = datetime.now()
         date = today.strftime("%d-%m-%YT%H:%M:00")
 
+        actions = ", ".join([f"{key}: {value}" for (key, value) in self.actions.items() if value != 0])
+
         with open(LOGS_PATH + "actions_log.txt", "a") as f:
-            f.write(f"Date: {date}, Method: {method}, Actions: {self.actions}\n")
+            f.write(f"DATE: {date}, "
+                    f"METHOD: {method}, "
+                    f"CURRENT FOLLOWING: {len(self.my_followers)}, "
+                    f"ACTIONS: {actions}\n")
 
     def logs_dir(self):
         if path.exists(LOGS_PATH):
