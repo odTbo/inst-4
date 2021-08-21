@@ -95,18 +95,18 @@ class Instagram:
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         to_follow = self.fetch_followers("soulhoe")
 
-        print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
+        # print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
         print(f"Num of users to follow: {len(to_follow)}")
-        exit()
+        # exit()
 
         for user in to_follow:
             try:
                 if self.follow_user(user["username"]):
+                    self.export_username(user["username"])
+                    time.sleep(1)
                     self.actions += 1
                     self.like_posts(user["username"])
                     print("\n")
-                    self.export_username(user["username"])
-                    time.sleep(2)
                 else:
                     print(f"Actions limited! Reached {self.actions} actions.")
                     # Actions limited
