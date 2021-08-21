@@ -88,8 +88,9 @@ class Instagram:
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
 
         to_follow = self.fetch_followers("soulhoe")
-        # print([user["username"] for user in to_follow])
-        # print(f"Num of users to follow: {len(to_follow)}")
+        print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
+        print(f"Num of users to follow: {len(to_follow)}")
+        exit()
         for user in to_follow:
             try:
                 if self.follow_user(user["username"]):
@@ -188,7 +189,7 @@ class Instagram:
                 # Check users
                 for user in users:
                     # If account meets conditions, add it to the output
-                    if self.account_check(user) and user not in output:
+                    if self.follow_conditions(user) and user not in output:
                         output.append(user)
                 if len(output) >= target_num or not next_max_id:  # If list has still more than 30 users we can move on
                     satisfied = True
@@ -207,10 +208,24 @@ class Instagram:
         # Get user_id
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
-        # Follow based on user_id
+        # Follow by user_id
         r = self.api.friendships_create(user_id)
         if r["status"] == "ok":
             print(f"[IG] Followed {username}.")
+            return True
+        else:
+            print(r)
+            return False
+
+    def unfollow_user(self, username):
+        """Unfollow IG User by username."""
+        # Get user_id
+        result = self.api.username_info(username)
+        user_id = result["user"]["pk"]
+        # Unfollow by user_id
+        r = self.api.friendships_destroy(user_id)
+        if r["status"] == "ok":
+            print(f"[IG] Unfollowed {username}.")
             return True
         else:
             print(r)
@@ -247,21 +262,7 @@ class Instagram:
         else:
             print(f"[IG] No posts for user {username}.")
 
-    def unfollow_user(self, username):
-        """Unfollow IG User by username."""
-        # Get user_id
-        result = self.api.username_info(username)
-        user_id = result["user"]["pk"]
-        # Unfollow based on user_id
-        r = self.api.friendships_destroy(user_id)
-        if r["status"] == "ok":
-            print(f"[IG] Unfollowed {username}.")
-            return True
-        else:
-            print(r)
-            return False
-
-    def account_check(self, account):
+    def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
         # print(account["username"], account["is_private"], account["has_anonymous_profile_picture"])
 
@@ -302,7 +303,7 @@ class Instagram:
             file.write('\n')
 
     def expired_lists(self):
-        """Checks if there are lists atleast 5 days old to unfollow."""
+        """Checks if there are lists atleast 4 days old to unfollow."""
         date_today = datetime.now()
         filenames = [file.split(".")[0] for file in glob.glob("*.txt")]
 
@@ -314,8 +315,8 @@ class Instagram:
             except ValueError:
                 pass
             else:
-                # Check if the file older than 5 days
-                if int((date_today - fname_date).days) >= 5:
+                # Check if the file older than 4 days
+                if int((date_today - fname_date).days) >= 4:
                     self.expired_follows_file = f'{fname_date.strftime("%d-%m-%Y")}.txt'
                     print("[IG] Expired list found")
                     return True
