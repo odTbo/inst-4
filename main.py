@@ -4,6 +4,7 @@ import datetime
 import time
 from os import path, getenv, remove, mkdir
 from datetime import datetime
+from random import choice
 import glob
 import logging
 import argparse
@@ -25,7 +26,8 @@ except ImportError:
         __version__ as client_version)
 
 LOGS_PATH = "logs/"
-TARGET_ACCOUNT = "zaperwave"
+TARGET_ACCOUNT = "soulhoe"
+
 
 load_dotenv()
 
