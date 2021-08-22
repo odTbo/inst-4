@@ -25,6 +25,8 @@ except ImportError:
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
+# Follow/Unfollow actions limit
+ACTIONS_LIMIT = choice(range(20, 31))
 LOGS_PATH = "logs/"
 TARGET_ACCOUNT = "soulhoe"
 
@@ -46,6 +48,7 @@ class Instagram:
             "Unfollow": 0,
             "Post Like": 0
         }
+        self.errors = []
 
     def run(self):
         self.logs_dir()
@@ -65,34 +68,42 @@ class Instagram:
 
         # While there are user to unfollow
         while len(to_unfollow_list) != 0:
+
             # Get the first user from the list
             user = to_unfollow_list[0]
-            if user not in self.my_followers:
 
-                # Reached 30 actions a session
-                if self.actions == 30:
-                    print("Reached 30 unfollows.")
-                    # Save the rest of users to original file
-                    self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
-                    break
+            # Reached set actions limit
+            if self.actions["Unfollow"] == ACTIONS_LIMIT:
+                print(f"Reached {ACTIONS_LIMIT} unfollows limit.")
+                # Save the rest of users to original file
+                self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
+                break
 
-                # Or unfollow a user
-                elif self.unfollow_user(user):
-                    self.actions["Unfollow"] += 1
-                    time.sleep(1)
-                    # Successful unfollow
+            elif user not in self.my_followers:
+                try:
+                    # Unfollow
+                    if self.unfollow_user(user):
+                        self.actions["Unfollow"] += 1
+                        time.sleep(1)
+                        # Successful unfollow
+                        to_unfollow_list.remove(user)
+                    # Actions limited by instagram
+                    else:
+                        # Save the rest of users to original file
+                        self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
+                        print("Error unfollowing, exiting.")
+                        break
+                # Internal API errors
+                except ClientError as e:
+                    error_msg = f"UNFOLLOW {e} {user}"
+                    self.errors.append(error_msg)
                     to_unfollow_list.remove(user)
 
-                # Or actions limited by instagram
-                else:
-                    # Save the rest of users to original file
-                    self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
-                    print("Error unfollowing, loop ended.")
-                    break
+            # Users follows back
             else:
                 to_unfollow_list.remove(user)
 
-        # Remove the empty source file if we are done with it
+        # Remove the empty source file if it's empty
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_follows_file)
 
@@ -100,18 +111,18 @@ class Instagram:
 
     def follow_method(self):
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
+        # Fetch accounts to follow
         to_follow = self.fetch_followers(TARGET_ACCOUNT)
 
-        # print([(user["username"], user["is_private"]) for user in to_follow if user["is_private"]])
         print(f"Num of users to follow: {len(to_follow)}")
-        # exit()
 
         for user in to_follow:
             try:
                 if self.follow_user(user["username"]):
-                    self.export_username(user["username"])
                     time.sleep(1)
+                    self.export_username(user["username"])
                     self.actions["Follow"] += 1
+                    # Like users posts
                     self.like_posts(user["username"])
                     print("\n")
                 else:
@@ -119,7 +130,8 @@ class Instagram:
                     # Actions limited
                     break
             except ClientError as e:
-                print(e, user["username"])
+                error_msg = f"FOLLOW {e} {user}"
+                self.errors.append(error_msg)
                 self.export_username(user["username"], unfollow=False)
 
         self.log_actions(method="Follow")
@@ -183,7 +195,6 @@ class Instagram:
         rank_token = self.api.generate_uuid()
 
         # r = self.api.user_following(user_id=user_id, rank_token=rank_token)
-        target_num = 20 # fetch 20 people to follow
         users = []
         results = self.api.user_followers(user_id, rank_token=rank_token)
         users.extend(results.get('users', []))
@@ -206,15 +217,15 @@ class Instagram:
                     # If account meets conditions, add it to the output
                     if self.follow_conditions(user) and user not in output:
                         output.append(user)
-                if len(output) >= target_num or not next_max_id:  # If list has still more than 30 users we can move on
+                if len(output) >= ACTIONS_LIMIT or not next_max_id:  # If list has still more than 30 users we can move on
                     satisfied = True
                 else:
                     results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
                     users.extend(results.get('users', []))
                     next_max_id = results.get('next_max_id')
 
-            if len(output) > target_num:
-                users = output[:target_num]
+            if len(output) > ACTIONS_LIMIT:
+                users = output[:ACTIONS_LIMIT]
 
         return users
 
@@ -254,7 +265,6 @@ class Instagram:
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
 
-        # ---------- Pagination with max_id ----------
         updates = []
         results = self.api.user_feed(user_id)
         updates.extend(results.get('items', []))
@@ -304,20 +314,20 @@ class Instagram:
 
         # Save to unfollow list
         if unfollow:
-            with open(LOGS_PATH + f"{date}.txt", mode="a") as file:
-                file.write(f"{username}\n")
+            with open(LOGS_PATH + f"{date}.txt", mode="a") as f:
+                f.write(f"{username}\n")
 
         # Save to ignore list
         if ignore:
-            with open(LOGS_PATH + "to_ignore.txt", mode="a") as file:
-                file.write(f"{username}\n")
+            with open(LOGS_PATH + "to_ignore.txt", mode="a") as f:
+                f.write(f"{username}\n")
 
     def export_to_unfollow(self, usernames, filename):
         """Saves remaining usernames waiting for unfollow to the original file."""
         filename = LOGS_PATH + filename
-        with open(filename, mode="w") as file:
-            file.write('\n'.join(usernames))
-            file.write('\n')
+        with open(filename, mode="w") as f:
+            f.write('\n'.join(usernames))
+            f.write('\n')
 
     def expired_lists(self):
         """Checks if there are lists atleast 4 days old to unfollow."""
@@ -372,6 +382,12 @@ class Instagram:
                     f"METHOD: {method}, "
                     f"CURRENT FOLLOWING: {len(self.my_followers)}, "
                     f"ACTIONS: {actions}\n")
+
+    def log_errors(self):
+        """Logs the errors encountered in a session."""
+        with open(LOGS_PATH + "errors_log.txt", "a") as f:
+            f.write('\n'.join(self.errors))
+            f.write('\n')
 
     def logs_dir(self):
         if path.exists(LOGS_PATH):
