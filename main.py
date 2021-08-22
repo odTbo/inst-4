@@ -32,7 +32,6 @@ LOGS_PATH = "logs/"
 # Account with target audience
 TARGET_ACCOUNT = "soulhoe"
 
-
 load_dotenv()
 
 
@@ -48,7 +47,8 @@ class Instagram:
         self.actions = {
             "Follow": 0,
             "Unfollow": 0,
-            "Post Like": 0
+            "Post Like": 0,
+            "Comments": 0
         }
         self.errors = []
 
