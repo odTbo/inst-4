@@ -27,7 +27,9 @@ except ImportError:
 
 # Follow/Unfollow actions limit
 ACTIONS_LIMIT = choice(range(20, 31))
+# Log files location
 LOGS_PATH = "logs/"
+# Account with target audience
 TARGET_ACCOUNT = "soulhoe"
 
 
