@@ -130,7 +130,7 @@ class Instagram:
                     # Actions limited
                     break
             except ClientError as e:
-                error_msg = f"FOLLOW {e} {user}"
+                error_msg = f"FOLLOW {e} {user['username']}"
                 self.errors.append(error_msg)
                 self.export_username(user["username"], unfollow=False)
 
