@@ -261,6 +261,7 @@ class Instagram:
             print(r)
             return False
 
+    # TODO improve like_posts
     def like_posts(self, username):
         """Like User's posts."""
         # Get user id
@@ -275,7 +276,7 @@ class Instagram:
         while next_max_id:
             results = self.api.user_feed(user_id, max_id=next_max_id)
             updates.extend(results.get('items', []))
-            if len(updates) >= 10:  # get only first 10 or so
+            if len(updates) >= 12:  # get only first 12 or so
                 break
             next_max_id = results.get('next_max_id')
         if len(updates) != 0:
