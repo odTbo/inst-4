@@ -26,7 +26,7 @@ except ImportError:
         __version__ as client_version)
 
 # Follow/Unfollow actions limit
-ACTIONS_LIMIT = choice(range(20, 31))
+ACTIONS_LIMIT = choice(range(20, 26))
 # Log files location
 LOGS_PATH = "logs/"
 # Account with target audience
@@ -64,6 +64,7 @@ class Instagram:
             self.follow_method()
 
         print(f"Actions made in this session: {self.actions}")
+        self.log_errors()
 
     def unfollow_method(self):
         to_unfollow_list = self.fetch_users_from_file(self.expired_follows_file)
@@ -86,7 +87,7 @@ class Instagram:
                     # Unfollow
                     if self.unfollow_user(user):
                         self.actions["Unfollow"] += 1
-                        time.sleep(1)
+                        time.sleep(2)
                         # Successful unfollow
                         to_unfollow_list.remove(user)
                     # Actions limited by instagram
@@ -121,11 +122,11 @@ class Instagram:
         for user in to_follow:
             try:
                 if self.follow_user(user["username"]):
-                    time.sleep(1)
+                    time.sleep(2)
                     self.export_username(user["username"])
                     self.actions["Follow"] += 1
                     # Like users posts
-                    self.like_posts(user["username"])
+                    self.like_posts(user["username"], step=2)
                     print("\n")
                 else:
                     print(f"Actions limited! Reached {self.actions} actions.")
@@ -261,33 +262,36 @@ class Instagram:
             print(r)
             return False
 
-    # TODO improve like_posts
-    def like_posts(self, username):
+    def like_posts(self, username, max_posts=12, step=3):
         """Like User's posts."""
         # Get user id
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
 
+        # Fetch Posts
         updates = []
         results = self.api.user_feed(user_id)
         updates.extend(results.get('items', []))
-
-        next_max_id = results.get('next_max_id')
-        while next_max_id:
-            results = self.api.user_feed(user_id, max_id=next_max_id)
-            updates.extend(results.get('items', []))
-            if len(updates) >= 12:  # get only first 12 or so
-                break
+        if not len(updates) > max_posts:
             next_max_id = results.get('next_max_id')
+            while next_max_id:
+                results = self.api.user_feed(user_id, max_id=next_max_id)
+                updates.extend(results.get('items', []))
+                if len(updates) > max_posts:  # get only first 12 or so
+                    break
+                next_max_id = results.get('next_max_id')
+
+        # Like Posts
         if len(updates) != 0:
             print(f"[IG] Liking posts for {username}...")
-            posts = updates[::3]
+            posts = updates[:max_posts:step]
             for post in posts:
                 # Like post
                 self.api.post_like(post["id"])
                 self.actions["Post Like"] += 1
-                time.sleep(1)
+                time.sleep(2)
             print(f"[IG] Liked {username}'s {len(posts)} posts.")
+        # No posts by user
         else:
             print(f"[IG] No posts for user {username}.")
 
