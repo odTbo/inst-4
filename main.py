@@ -392,9 +392,10 @@ class Instagram:
 
     def log_errors(self):
         """Logs the errors encountered in a session."""
-        with open(LOGS_PATH + "errors_log.txt", "a") as f:
-            f.write('\n'.join(self.errors))
-            f.write('\n')
+        if len(self.errors) != 0:
+            with open(LOGS_PATH + "errors_log.txt", "a") as f:
+                f.write('\n'.join(self.errors))
+                f.write('\n')
 
     def logs_dir(self):
         if path.exists(LOGS_PATH):
