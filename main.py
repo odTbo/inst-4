@@ -365,7 +365,7 @@ class Instagram:
                 output = [line.strip() for line in f.readlines()]
         else:
             print(f"The file '{filename}' doesn't exist.")
-            return
+            return None
 
         return output
 
