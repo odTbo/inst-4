@@ -69,6 +69,7 @@ class Instagram:
             follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
             if follows_today:
 
+                # To get 80-100 followers a day
                 if 80 <= len(follows_today) <= 100:
                     print("Enough follows for today")
                 else:
