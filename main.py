@@ -31,6 +31,9 @@ ACTIONS_LIMIT = choice(range(20, 26))
 LOGS_PATH = "logs/"
 # Account with target audience
 TARGET_ACCOUNT = "soulhoe"
+# Date today
+DATETIME_TODAY = datetime.now()
+DATE_STR = DATETIME_TODAY.strftime("%d-%m-%Y")
 
 load_dotenv()
 
@@ -56,12 +59,27 @@ class Instagram:
         self.logs_dir()
         self.login()
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
+
         if self.expired_lists():
             print("[IG] Unfollow Method")
             self.unfollow_method()
+
         else:
             print("[IG] Follow Method")
-            self.follow_method()
+            follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
+            if follows_today:
+
+                # To get 80-100 followers a day
+                if 80 <= len(follows_today) <= 100:
+                    print("Enough follows for today")
+                else:
+                    print(f"Follows made today: {len(follows_today)}")
+                    # print("Run follow method")
+                    self.follow_method()
+            else:
+                print("No follows yet today.")
+                # print("Run follow method")
+                self.follow_method()
 
         print(f"Actions made in this session: {self.actions}")
         self.log_errors()
@@ -76,7 +94,7 @@ class Instagram:
             user = to_unfollow_list[0]
 
             # Reached set actions limit
-            if self.actions["Unfollow"] == ACTIONS_LIMIT:
+            if self.actions["Unfollow"] == 25:
                 print(f"Reached {ACTIONS_LIMIT} unfollows limit.")
                 # Save the rest of users to original file
                 self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
@@ -316,12 +334,10 @@ class Instagram:
 
     def export_username(self, username, unfollow=True, ignore=True):
         """Saves followed user to unfollow list and to ignore list, to prevent future interaction with the account."""
-        today = datetime.now()
-        date = today.strftime("%d-%m-%Y")
 
         # Save to unfollow list
         if unfollow:
-            with open(LOGS_PATH + f"{date}.txt", mode="a") as f:
+            with open(LOGS_PATH + f"{DATE_STR}.txt", mode="a") as f:
                 f.write(f"{username}\n")
 
         # Save to ignore list
@@ -365,7 +381,7 @@ class Instagram:
                 output = [line.strip() for line in f.readlines()]
         else:
             print(f"The file '{filename}' doesn't exist.")
-            return
+            return None
 
         return output
 
@@ -379,8 +395,7 @@ class Instagram:
 
     def log_actions(self, method):
         """Logs the number of instagram actions made in a session."""
-        today = datetime.now()
-        date = today.strftime("%d-%m-%YT%H:%M:00")
+        date = DATETIME_TODAY.strftime("%d-%m-%YT%H:%M:00")
 
         actions = ", ".join([f"{key}: {value}" for (key, value) in self.actions.items() if value != 0])
 
