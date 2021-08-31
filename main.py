@@ -55,7 +55,7 @@ class Instagram:
         }
         self.errors = []
 
-    def run(self):
+    def session(self):
         self.logs_dir()
         self.login()
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
@@ -439,4 +439,4 @@ class Instagram:
 
 if __name__ == "__main__":
     ig = Instagram()
-    ig.run()
+    ig.session()
