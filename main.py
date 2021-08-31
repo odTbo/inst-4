@@ -157,57 +157,6 @@ class Instagram:
 
         self.log_actions(method="Follow")
 
-    def login(self):
-        """Establishes connection to Instagram API."""
-        # print('Client version: {0!s}'.format(client_version))
-
-        device_id = None
-        try:
-            settings_file = self.settings_file_path
-            if not path.isfile(settings_file):
-                # settings file does not exist
-                print('Unable to find file: {0!s}'.format(settings_file))
-
-                # login new
-                self.api = Client(
-                    self.username, self.password,
-                    on_login=lambda x: self.onlogin_callback(x, self.settings_file_path), auto_patch=True)
-            else:
-                with open(settings_file) as file_data:
-                    cached_settings = json.load(file_data, object_hook=self.from_json)
-                # print('Reusing settings: {0!s}'.format(settings_file))
-
-                device_id = cached_settings.get('device_id')
-                # reuse auth settings
-                self.api = Client(
-                    self.username, self.password,
-                    settings=cached_settings, auto_patch=True)
-
-        except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
-            print('ClientCookieExpiredError/ClientLoginRequiredError: {0!s}'.format(e))
-
-            # Login expired
-            # Do relogin but use default ua, keys and such
-            self.api = Client(
-                self.username, self.password,
-                device_id=device_id,
-                on_login=lambda x: self.onlogin_callback(x, self.settings_file_path), auto_patch=True)
-
-        except ClientLoginError as e:
-            print('ClientLoginError {0!s}'.format(e))
-            exit(9)
-        except ClientError as e:
-            print('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
-            exit(9)
-        except Exception as e:
-            print('Unexpected Exception: {0!s}'.format(e))
-            exit(99)
-
-        # Show when login expires
-        # cookie_expiry = self.api.cookie_jar.auth_expires
-        # print('Cookie Expiry: {0!s}'.format(
-        #     datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
-
     def fetch_followers(self, target_account, my_account=False):
         """Grabs followers from target account."""
         # Get user_id
@@ -331,6 +280,57 @@ class Instagram:
             return False
         else:
             return True
+
+    def login(self):
+        """Establishes connection to Instagram API."""
+        # print('Client version: {0!s}'.format(client_version))
+
+        device_id = None
+        try:
+            settings_file = self.settings_file_path
+            if not path.isfile(settings_file):
+                # settings file does not exist
+                print('Unable to find file: {0!s}'.format(settings_file))
+
+                # login new
+                self.api = Client(
+                    self.username, self.password,
+                    on_login=lambda x: self.onlogin_callback(x, self.settings_file_path), auto_patch=True)
+            else:
+                with open(settings_file) as file_data:
+                    cached_settings = json.load(file_data, object_hook=self.from_json)
+                # print('Reusing settings: {0!s}'.format(settings_file))
+
+                device_id = cached_settings.get('device_id')
+                # reuse auth settings
+                self.api = Client(
+                    self.username, self.password,
+                    settings=cached_settings, auto_patch=True)
+
+        except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
+            print('ClientCookieExpiredError/ClientLoginRequiredError: {0!s}'.format(e))
+
+            # Login expired
+            # Do relogin but use default ua, keys and such
+            self.api = Client(
+                self.username, self.password,
+                device_id=device_id,
+                on_login=lambda x: self.onlogin_callback(x, self.settings_file_path), auto_patch=True)
+
+        except ClientLoginError as e:
+            print('ClientLoginError {0!s}'.format(e))
+            exit(9)
+        except ClientError as e:
+            print('ClientError {0!s} (Code: {1:d}, Response: {2!s})'.format(e.msg, e.code, e.error_response))
+            exit(9)
+        except Exception as e:
+            print('Unexpected Exception: {0!s}'.format(e))
+            exit(99)
+
+        # Show when login expires
+        # cookie_expiry = self.api.cookie_jar.auth_expires
+        # print('Cookie Expiry: {0!s}'.format(
+        #     datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
 
     def export_username(self, username, unfollow=True, ignore=True):
         """Saves followed user to unfollow list and to ignore list, to prevent future interaction with the account."""
