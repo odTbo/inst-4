@@ -81,6 +81,9 @@ class Instagram:
                 # print("Run follow method")
                 self.follow_method()
 
+        # Likes first post of each follower
+        self.likes_for_followers()
+
         print(f"Actions made in this session: {self.actions}")
         self.log_errors()
 
@@ -156,6 +159,12 @@ class Instagram:
                 self.export_username(user["username"], unfollow=False)
 
         self.log_actions(method="Follow")
+
+    def likes_for_followers(self):
+        print("Liking posts of followers.")
+        for user in self.my_followers:
+            print(f"Liking post for {user}")
+            self.like_posts(user, max_posts=1, step=1)
 
     def fetch_followers(self, target_account, my_account=False):
         """Grabs followers from target account."""
