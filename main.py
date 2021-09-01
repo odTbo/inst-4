@@ -283,39 +283,6 @@ class Instagram:
                 self.actions["Post Like"] += 1
                 time.sleep(2)
 
-    # def like_posts(self, username, max_posts=12, step=3):
-    #     """Like User's posts."""
-    #     # Get user id
-    #     result = self.api.username_info(username)
-    #     user_id = result["user"]["pk"]
-    #
-    #     # Fetch Posts
-    #     updates = []
-    #     results = self.api.user_feed(user_id)
-    #     updates.extend(results.get('items', []))
-    #     if not len(updates) > max_posts:
-    #         next_max_id = results.get('next_max_id')
-    #         while next_max_id:
-    #             results = self.api.user_feed(user_id, max_id=next_max_id)
-    #             updates.extend(results.get('items', []))
-    #             if len(updates) > max_posts:  # get only first 12 or so
-    #                 break
-    #             next_max_id = results.get('next_max_id')
-    #
-    #     # Like Posts
-    #     if len(updates) != 0:
-    #         print(f"[IG] Liking posts for {username}...")
-    #         posts = updates[:max_posts:step]
-    #         for post in posts:
-    #             # Like post
-    #             self.api.post_like(post["id"])
-    #             self.actions["Post Like"] += 1
-    #             time.sleep(2)
-    #         print(f"[IG] Liked {username}'s {len(posts)} posts.")
-    #     # No posts by user
-    #     else:
-    #         print(f"[IG] No posts for user {username}.")
-
     def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
         # print(account["username"], account["is_private"], account["has_anonymous_profile_picture"])
