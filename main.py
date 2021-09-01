@@ -120,7 +120,7 @@ class Instagram:
 
                 # Internal API errors
                 except ClientError as e:
-                    error_msg = f"UNFOLLOW {e} {user}"
+                    error_msg = f"UNFOLLOW ERROR {e} {user}"
                     self.errors.append(error_msg)
                     to_unfollow_list.remove(user)
 
@@ -148,14 +148,20 @@ class Instagram:
                     self.export_username(user["username"])
                     self.actions["Follow"] += 1
                     # Like users posts
-                    self.like_posts(user["username"], step=2)
+                    posts = self.fetch_posts(user["username"], step=2)
+                    if posts:
+                        print(f"Liking posts for {user}.")
+                        self.like_posts(posts)
+                    else:
+                        print(f"{user} has no posts.")
+                    # self.like_posts(user["username"], step=2)
                     print("\n")
                 else:
                     print(f"Actions limited! Reached {self.actions} actions.")
                     # Actions limited
                     break
             except ClientError as e:
-                error_msg = f"FOLLOW {e} {user['username']}"
+                error_msg = f"FOLLOW ERROR {e} {user['username']}"
                 self.errors.append(error_msg)
                 self.export_username(user["username"], unfollow=False)
 
@@ -164,7 +170,12 @@ class Instagram:
     def likes_for_followers(self):
         print("Liking posts of followers.")
         for user in self.my_followers:
-            self.like_posts(user, max_posts=1, step=1)
+            posts = self.fetch_posts(user, max_posts=1, step=1)
+            if posts:
+                print(f"Liking post for {user}.\n")
+                self.like_posts(posts)
+            else:
+                print(f"{user} has no posts.\n")
 
     def fetch_followers(self, target_account, my_account=False):
         """Grabs followers from target account."""
@@ -238,38 +249,72 @@ class Instagram:
             print(r)
             return False
 
-    def like_posts(self, username, max_posts=12, step=3):
-        """Like User's posts."""
+    def fetch_posts(self, username, max_posts=12, step=1):
+        """Fetch User's posts."""
         # Get user id
         result = self.api.username_info(username)
         user_id = result["user"]["pk"]
 
         # Fetch Posts
-        updates = []
+        posts = []
         results = self.api.user_feed(user_id)
-        updates.extend(results.get('items', []))
-        if not len(updates) > max_posts:
+        posts.extend(results.get('items', []))
+        if not len(posts) > max_posts:
             next_max_id = results.get('next_max_id')
             while next_max_id:
                 results = self.api.user_feed(user_id, max_id=next_max_id)
-                updates.extend(results.get('items', []))
-                if len(updates) > max_posts:  # get only first 12 or so
+                posts.extend(results.get('items', []))
+                if len(posts) > max_posts:  # get only first 12 or so
                     break
                 next_max_id = results.get('next_max_id')
 
-        # Like Posts
-        if len(updates) != 0:
-            print(f"[IG] Liking posts for {username}...")
-            posts = updates[:max_posts:step]
-            for post in posts:
-                # Like post
+        return posts[:max_posts:step]
+
+    def like_posts(self, posts):
+        """Likes user's posts. Input is list of post objects."""
+        for post in posts:
+            # Like post
+            try:
                 self.api.post_like(post["id"])
+            except Exception as e:
+                error_msg = f"POST LIKE ERROR {e}"
+                self.errors.append(error_msg)
+            else:
                 self.actions["Post Like"] += 1
                 time.sleep(2)
-            print(f"[IG] Liked {username}'s {len(posts)} posts.")
-        # No posts by user
-        else:
-            print(f"[IG] No posts for user {username}.")
+
+    # def like_posts(self, username, max_posts=12, step=3):
+    #     """Like User's posts."""
+    #     # Get user id
+    #     result = self.api.username_info(username)
+    #     user_id = result["user"]["pk"]
+    #
+    #     # Fetch Posts
+    #     updates = []
+    #     results = self.api.user_feed(user_id)
+    #     updates.extend(results.get('items', []))
+    #     if not len(updates) > max_posts:
+    #         next_max_id = results.get('next_max_id')
+    #         while next_max_id:
+    #             results = self.api.user_feed(user_id, max_id=next_max_id)
+    #             updates.extend(results.get('items', []))
+    #             if len(updates) > max_posts:  # get only first 12 or so
+    #                 break
+    #             next_max_id = results.get('next_max_id')
+    #
+    #     # Like Posts
+    #     if len(updates) != 0:
+    #         print(f"[IG] Liking posts for {username}...")
+    #         posts = updates[:max_posts:step]
+    #         for post in posts:
+    #             # Like post
+    #             self.api.post_like(post["id"])
+    #             self.actions["Post Like"] += 1
+    #             time.sleep(2)
+    #         print(f"[IG] Liked {username}'s {len(posts)} posts.")
+    #     # No posts by user
+    #     else:
+    #         print(f"[IG] No posts for user {username}.")
 
     def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
