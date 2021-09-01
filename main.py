@@ -90,7 +90,7 @@ class Instagram:
     def unfollow_method(self):
         to_unfollow_list = self.fetch_users_from_file(self.expired_follows_file)
 
-        # While there are user to unfollow
+        # While there are users to unfollow
         while len(to_unfollow_list) != 0:
 
             # Get the first user from the list
@@ -103,6 +103,7 @@ class Instagram:
                 self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
                 break
 
+            # User is not a follower
             elif user not in self.my_followers:
                 try:
                     # Unfollow
@@ -117,13 +118,14 @@ class Instagram:
                         self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
                         print("Error unfollowing, exiting.")
                         break
+
                 # Internal API errors
                 except ClientError as e:
                     error_msg = f"UNFOLLOW {e} {user}"
                     self.errors.append(error_msg)
                     to_unfollow_list.remove(user)
 
-            # Users follows back
+            # User follows back
             else:
                 to_unfollow_list.remove(user)
 
