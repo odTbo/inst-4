@@ -70,7 +70,7 @@ class Instagram:
             if follows_today:
 
                 # To get 80-100 followers a day
-                if 80 <= len(follows_today):
+                if 100 <= len(follows_today):
                     print("Enough follows for today")
                 else:
                     print(f"Follows made today: {len(follows_today)}")
