@@ -74,15 +74,14 @@ class Instagram:
                     print("Enough follows for today")
                 else:
                     print(f"Follows made today: {len(follows_today)}")
-                    # print("Run follow method")
+
                     self.follow_method()
             else:
                 print("No follows yet today.")
-                # print("Run follow method")
-                self.follow_method()
+                # Likes first post of each follower
+                self.likes_for_followers()
 
-        # Likes first post of each follower
-        self.likes_for_followers()
+                self.follow_method()
 
         print(f"Actions made in this session: {self.actions}")
         self.log_errors()
@@ -163,7 +162,6 @@ class Instagram:
     def likes_for_followers(self):
         print("Liking posts of followers.")
         for user in self.my_followers:
-            print(f"Liking post for {user}")
             self.like_posts(user, max_posts=1, step=1)
 
     def fetch_followers(self, target_account, my_account=False):
