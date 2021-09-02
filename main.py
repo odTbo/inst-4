@@ -59,7 +59,7 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
-        # self.image_downloader("tofuandotherdrugs")
+        # self.image_downloader("username")
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
 
         if self.expired_lists():
