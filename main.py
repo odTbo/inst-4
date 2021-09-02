@@ -43,6 +43,7 @@ class Instagram:
     def __init__(self):
         self.username = getenv("IG_USERNAME")
         self.password = getenv("IG_PASSWORD")
+        self.to_scrape = getenv("TO_SCRAPE")
         self.settings_file_path = "ig_credentials.json"
         self.to_ignore = set()
         self.my_followers = set()
@@ -59,7 +60,10 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
-        # self.image_downloader("username")
+        # Bonus image scraper
+        if self.to_scrape:
+            self.image_downloader(self.to_scrape)
+
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
 
         if self.expired_lists():
