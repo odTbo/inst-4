@@ -5,6 +5,7 @@ import time
 from os import path, getenv, remove, mkdir
 from datetime import datetime
 from random import choice
+from image_scraper import scrape_imgs
 import glob
 import logging
 import argparse
@@ -58,6 +59,7 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
+        # self.image_downloader("tofuandotherdrugs")
         self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
 
         if self.expired_lists():
@@ -85,6 +87,32 @@ class Instagram:
 
         print(f"Actions made in this session: {self.actions}")
         self.log_errors()
+
+    # BONUS IMAGE DOWNLOADER
+    def image_downloader(self, username):
+
+        # Fetch posts
+        posts = self.fetch_posts(username=username, max_posts=999)
+
+        # Extract URLs
+        urls = []
+        for post in posts:
+            try:
+                carousel = post["carousel_media"]
+            except KeyError:
+                if post["media_type"] == 2:
+                    urls.append(post["video_versions"][0]["url"])
+                else:
+                    urls.append(post["image_versions2"]["candidates"][0]["url"])
+            else:
+                for media in carousel:
+                    if media["media_type"] == 2:
+                        urls.append(media["video_versions"][0]["url"])
+                    else:
+                        urls.append(media["image_versions2"]["candidates"][0]["url"])
+
+        # Download posts
+        scrape_imgs(username, urls)
 
     def unfollow_method(self):
         to_unfollow_list = self.fetch_users_from_file(self.expired_follows_file)
