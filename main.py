@@ -63,40 +63,40 @@ class Instagram:
         # Bonus image scraper
         if self.to_scrape:
             self.image_downloader(self.to_scrape)
-
-        self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
-
-        if self.expired_lists():
-            print("[IG] Unfollow Method")
-            self.unfollow_method()
-
         else:
-            print("[IG] Follow Method")
-            follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
-            if follows_today:
+            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
 
-                # To get 80-100 followers a day
-                if 100 <= len(follows_today):
-                    print("Enough follows for today")
+            if self.expired_lists():
+                print("[IG] Unfollow Method")
+                self.unfollow_method()
+
+            else:
+                print("[IG] Follow Method")
+                follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
+                if follows_today:
+
+                    # To get 80-100 followers a day
+                    if 100 <= len(follows_today):
+                        print("Enough follows for today")
+                    else:
+                        print(f"Follows made today: {len(follows_today)}")
+
+                        self.follow_method()
                 else:
-                    print(f"Follows made today: {len(follows_today)}")
+                    print("No follows yet today.")
+                    # Likes first post of each follower
+                    # self.likes_for_followers()
 
                     self.follow_method()
-            else:
-                print("No follows yet today.")
-                # Likes first post of each follower
-                # self.likes_for_followers()
 
-                self.follow_method()
-
-        print(f"Actions made in this session: {self.actions}")
-        self.log_errors()
+            print(f"Actions made in this session: {self.actions}")
+            self.log_errors()
 
     # BONUS IMAGE DOWNLOADER
     def image_downloader(self, username):
-
+        # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         # Fetch posts
-        posts = self.fetch_posts(username=username, max_posts=999)
+        posts = self.fetch_posts(username=username, max_posts=30)
 
         # Extract URLs
         urls = []
