@@ -79,7 +79,7 @@ class Instagram:
             else:
                 print("No follows yet today.")
                 # Likes first post of each follower
-                self.likes_for_followers()
+                # self.likes_for_followers()
 
                 self.follow_method()
 
@@ -170,7 +170,7 @@ class Instagram:
     def likes_for_followers(self):
         print("Liking posts of followers.")
         for user in self.my_followers:
-            posts = self.fetch_posts(user, max_posts=1, step=1)
+            posts = self.fetch_posts(user, max_posts=1)
             if posts:
                 print(f"Liking post for {user}.\n")
                 self.like_posts(posts)
