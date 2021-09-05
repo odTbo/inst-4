@@ -26,17 +26,17 @@ except ImportError:
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
+load_dotenv()
+
 # Follow/Unfollow actions limit
 ACTIONS_LIMIT = choice(range(20, 26))
 # Log files location
 LOGS_PATH = "logs/"
 # Account with target audience
-TARGET_ACCOUNT = "soulhoe"
+TARGET_ACCOUNT = getenv("TARGET_ACCOUNT")
 # Date today
 DATETIME_TODAY = datetime.now()
 DATE_STR = DATETIME_TODAY.strftime("%d-%m-%Y")
-
-load_dotenv()
 
 
 class Instagram:
@@ -67,7 +67,7 @@ class Instagram:
             self.image_downloader(self.to_scrape)
 
         else:
-            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
+            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
 
             if self.expired_lists():
                 print("[IG] Unfollow Method")
@@ -186,10 +186,10 @@ class Instagram:
                     # Like users posts
                     posts = self.fetch_posts(user["username"], step=2)
                     if posts:
-                        print(f"Liking posts for {user}.")
+                        print(f"Liking posts for {user['username']}.")
                         self.like_posts(posts)
                     else:
-                        print(f"{user} has no posts.")
+                        print(f"{user['username']} has no posts.")
                     # self.like_posts(user["username"], step=2)
                     print("\n")
                 else:
@@ -469,8 +469,8 @@ class Instagram:
             except ValueError:
                 pass
             else:
-                # Check if the file older than 4 days
-                if int((date_today - fname_date).days) >= 4:
+                # Check if the file older than 3 days
+                if int((date_today - fname_date).days) >= 3:
                     self.expired_follows_file = f'{fname_date.strftime("%d-%m-%Y")}.txt'
                     print("[IG] Expired list found")
                     return True
