@@ -62,6 +62,8 @@ class Instagram:
         self.login()
         # Bonus image scraper
         if self.to_scrape:
+            print("[IG] Scraper method")
+            print(f"[IG] Scraping profile: {self.to_scrape}")
             self.image_downloader(self.to_scrape)
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
@@ -96,8 +98,8 @@ class Instagram:
     def image_downloader(self, username):
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         # Fetch posts
-        posts = self.fetch_posts(username=username, max_posts=30)
-
+        posts = self.fetch_posts(username=username, max_posts=999)
+        print(f"Posts to scrape: {len(posts)}")
         # Extract URLs
         urls = []
         for post in posts:
@@ -116,6 +118,7 @@ class Instagram:
                         urls.append(media["image_versions2"]["candidates"][0]["url"])
 
         # Download posts
+        print("Downloading posts.")
         scrape_imgs(username, urls)
 
     def unfollow_method(self):
