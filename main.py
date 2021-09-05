@@ -65,6 +65,7 @@ class Instagram:
             print("[IG] Scraper method")
             print(f"[IG] Scraping profile: {self.to_scrape}")
             self.image_downloader(self.to_scrape)
+
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
 
@@ -212,47 +213,94 @@ class Instagram:
             else:
                 print(f"{user} has no posts.\n")
 
-    def fetch_followers(self, target_account, my_account=False):
+    # def fetch_followers(self, target_account, my_account=False):
+    #     """Grabs followers from target account."""
+    #     # Get user_id
+    #     result = self.api.username_info(target_account)
+    #     user_id = result["user"]["pk"]
+    #     rank_token = self.api.generate_uuid()
+    #
+    #     # r = self.api.user_following(user_id=user_id, rank_token=rank_token)
+    #     users = []
+    #     results = self.api.user_followers(user_id, rank_token=rank_token)
+    #     users.extend(results.get('users', []))
+    #
+    #     next_max_id = results.get('next_max_id')
+    #     # print(f"Num of users from result: {len(users)}")
+    #     if my_account:
+    #         while next_max_id:
+    #             time.sleep(1)
+    #             results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
+    #             users.extend(results.get('users', []))
+    #
+    #             next_max_id = results.get('next_max_id')
+    #     else:
+    #         output = []
+    #         satisfied = False
+    #         while not satisfied:
+    #             # Check users
+    #             for user in users:
+    #                 # If account meets conditions, add it to the output
+    #                 if self.follow_conditions(user) and user not in output:
+    #                     output.append(user)
+    #             if len(output) >= ACTIONS_LIMIT or not next_max_id:  # If list has still more than 30 users we can move on
+    #                 satisfied = True
+    #             else:
+    #                 results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
+    #                 users.extend(results.get('users', []))
+    #                 next_max_id = results.get('next_max_id')
+    #
+    #         if len(output) > ACTIONS_LIMIT:
+    #             users = output[:ACTIONS_LIMIT]
+    #
+    #     return users
+
+    def fetch_followers(self, target_account, all_=False):
         """Grabs followers from target account."""
-        # Get user_id
+        # Get user_id and rank token
         result = self.api.username_info(target_account)
         user_id = result["user"]["pk"]
         rank_token = self.api.generate_uuid()
 
-        # r = self.api.user_following(user_id=user_id, rank_token=rank_token)
         users = []
-        results = self.api.user_followers(user_id, rank_token=rank_token)
-        users.extend(results.get('users', []))
 
-        next_max_id = results.get('next_max_id')
-        # print(f"Num of users from result: {len(users)}")
-        if my_account:
+        if all_:
+            results = self.api.user_followers(user_id, rank_token=rank_token)
+
+            for user in results.get('users', []):
+                users.append(user)
+
+            next_max_id = results.get('next_max_id')
+
             while next_max_id:
-                time.sleep(1)
+                time.sleep(3)
                 results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
-                users.extend(results.get('users', []))
+
+                for user in results.get('users', []):
+                    if user not in users:
+                        users.append(user)
 
                 next_max_id = results.get('next_max_id')
         else:
-            output = []
-            satisfied = False
-            while not satisfied:
-                # Check users
-                for user in users:
-                    # If account meets conditions, add it to the output
-                    if self.follow_conditions(user) and user not in output:
-                        output.append(user)
-                if len(output) >= ACTIONS_LIMIT or not next_max_id:  # If list has still more than 30 users we can move on
-                    satisfied = True
-                else:
-                    results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
-                    users.extend(results.get('users', []))
-                    next_max_id = results.get('next_max_id')
+            results = self.api.user_followers(user_id, rank_token=rank_token)
 
-            if len(output) > ACTIONS_LIMIT:
-                users = output[:ACTIONS_LIMIT]
+            for user in results.get('users', []):
+                if self.follow_conditions(user):
+                    users.append(user)
 
-        return users
+            next_max_id = results.get('next_max_id')
+
+            while next_max_id and len(users) < ACTIONS_LIMIT:
+                time.sleep(3)
+                results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
+
+                for user in results.get('users', []):
+                    if self.follow_conditions(user) and user not in users:
+                        users.append(user)
+
+                next_max_id = results.get('next_max_id')
+
+        return users[:ACTIONS_LIMIT]
 
     def follow_user(self, username):
         """Follow IG User by username."""
