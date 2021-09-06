@@ -5,7 +5,7 @@ import time
 from os import path, getenv, remove, mkdir
 from datetime import datetime
 from random import choice
-from image_scraper import scrape_imgs
+from image_scraper import dwnld_imgs
 import glob
 import logging
 import argparse
@@ -67,7 +67,7 @@ class Instagram:
             self.image_downloader(self.to_scrape)
 
         else:
-            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, my_account=True))
+            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
 
             if self.expired_lists():
                 print("[IG] Unfollow Method")
@@ -120,7 +120,7 @@ class Instagram:
 
         # Download posts
         print("Downloading posts.")
-        scrape_imgs(username, urls)
+        dwnld_imgs(username, urls)
 
     def unfollow_method(self):
         to_unfollow_list = self.fetch_users_from_file(self.expired_follows_file)

@@ -15,7 +15,7 @@ def output_dir(directory):
         mkdir(directory)
 
 
-def scrape_imgs(username, links):
+def dwnld_imgs(username, links):
     account_dir = f"{username}/"
     output_dir(account_dir)
 
