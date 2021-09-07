@@ -164,7 +164,7 @@ class Instagram:
             else:
                 to_unfollow_list.remove(user)
 
-        # Remove the empty source file if it's empty
+        # Remove the source file if it's empty
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_follows_file)
 
