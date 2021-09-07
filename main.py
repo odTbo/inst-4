@@ -120,8 +120,9 @@ class Instagram:
                     else:
                         urls.append(media["image_versions2"]["candidates"][0]["url"])
 
+        print(f"Media to download: {len(urls)}")
         # Download posts
-        print("Downloading posts.")
+        print("Downloading media...")
         dwnld_imgs(username, urls)
 
     def unfollow_method(self):
