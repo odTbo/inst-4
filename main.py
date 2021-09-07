@@ -5,7 +5,7 @@ import time
 from os import path, getenv, remove, mkdir
 from datetime import datetime
 from random import choice
-from image_scraper import dwnld_imgs
+from image_scraper import dwnld_imgs, users_to_scrape
 import glob
 import logging
 import argparse
@@ -43,7 +43,6 @@ class Instagram:
     def __init__(self):
         self.username = getenv("IG_USERNAME")
         self.password = getenv("IG_PASSWORD")
-        self.to_scrape = getenv("TO_SCRAPE")
         self.settings_file_path = "ig_credentials.json"
         self.to_ignore = set()
         self.my_followers = set()
@@ -60,11 +59,13 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
+
         # Bonus image scraper
-        if self.to_scrape:
+        to_scrape = users_to_scrape()
+        if to_scrape:
             print("[IG] Scraper method")
-            print(f"[IG] Scraping profile: {self.to_scrape}")
-            self.image_downloader(self.to_scrape)
+            for user in to_scrape:
+                self.image_downloader(user)
 
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
@@ -99,6 +100,7 @@ class Instagram:
     def image_downloader(self, username):
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         # Fetch posts
+        print(f"Scraping profile: {username}")
         posts = self.fetch_posts(username=username, max_posts=999)
         print(f"Posts to scrape: {len(posts)}")
         # Extract URLs

@@ -8,6 +8,24 @@ CWD = str(pathlib.Path(__file__).parent.absolute())
 # output = "output/"
 
 
+def blank_input(filename="to_scrape.txt"):
+    if path.exists(filename):
+        with open(filename, "w") as f:
+            f.truncate(0)
+
+
+def users_to_scrape(filename="to_scrape.txt"):
+    """Grabs all usernames from a file and returns them as a list."""
+    if path.exists(filename):
+        with open(filename, "r") as f:
+            output = [line.strip() for line in f.readlines()]
+    else:
+        print(f"The file '{filename}' doesn't exist.")
+        return None
+    blank_input()
+    return output
+
+
 def output_dir(directory):
     if path.exists(directory):
         pass
