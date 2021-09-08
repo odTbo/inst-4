@@ -63,7 +63,12 @@ class Instagram:
         if to_scrape:
             print("[IG] Scraper method")
             for user in to_scrape:
-                self.image_downloader(user)
+                try:
+                    self.image_downloader(user)
+                except ClientError:
+                    print(f"Private profile: {user}")
+                    # Request a follow
+                    # Save username
 
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
