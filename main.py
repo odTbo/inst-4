@@ -244,6 +244,9 @@ class Instagram:
                         users.append(user)
 
                 next_max_id = results.get('next_max_id')
+
+            return users
+
         else:
             results = self.api.user_followers(user_id, rank_token=rank_token)
 
@@ -263,7 +266,7 @@ class Instagram:
 
                 next_max_id = results.get('next_max_id')
 
-        return users[:ACTIONS_LIMIT]
+            return users[:ACTIONS_LIMIT]
 
     def follow_user(self, username):
         """Follow IG User by username."""
