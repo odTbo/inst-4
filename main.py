@@ -125,7 +125,6 @@ class Instagram:
 
         print(f"Media to download: {len(urls)}")
         # Download posts
-        print("Downloading media...")
         dwnld_imgs(username, urls)
 
     def unfollow_method(self):
@@ -218,48 +217,6 @@ class Instagram:
                 self.like_posts(posts)
             else:
                 print(f"{user} has no posts.\n")
-
-    # def fetch_followers(self, target_account, my_account=False):
-    #     """Grabs followers from target account."""
-    #     # Get user_id
-    #     result = self.api.username_info(target_account)
-    #     user_id = result["user"]["pk"]
-    #     rank_token = self.api.generate_uuid()
-    #
-    #     # r = self.api.user_following(user_id=user_id, rank_token=rank_token)
-    #     users = []
-    #     results = self.api.user_followers(user_id, rank_token=rank_token)
-    #     users.extend(results.get('users', []))
-    #
-    #     next_max_id = results.get('next_max_id')
-    #     # print(f"Num of users from result: {len(users)}")
-    #     if my_account:
-    #         while next_max_id:
-    #             time.sleep(1)
-    #             results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
-    #             users.extend(results.get('users', []))
-    #
-    #             next_max_id = results.get('next_max_id')
-    #     else:
-    #         output = []
-    #         satisfied = False
-    #         while not satisfied:
-    #             # Check users
-    #             for user in users:
-    #                 # If account meets conditions, add it to the output
-    #                 if self.follow_conditions(user) and user not in output:
-    #                     output.append(user)
-    #             if len(output) >= ACTIONS_LIMIT or not next_max_id:  # If list has still more than 30 users we can move on
-    #                 satisfied = True
-    #             else:
-    #                 results = self.api.user_followers(user_id, rank_token=rank_token, max_id=next_max_id)
-    #                 users.extend(results.get('users', []))
-    #                 next_max_id = results.get('next_max_id')
-    #
-    #         if len(output) > ACTIONS_LIMIT:
-    #             users = output[:ACTIONS_LIMIT]
-    #
-    #     return users
 
     def fetch_followers(self, target_account, all_=False):
         """Grabs followers from target account."""

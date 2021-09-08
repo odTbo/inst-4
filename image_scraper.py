@@ -42,5 +42,6 @@ def dwnld_imgs(username, links):
 
         dload.save(url=link, path=f"{CWD}/" + account_dir + filename, overwrite=False)
 
+    print("Downloading media...")
     with ThreadPoolExecutor() as exector:
         exector.map(download_image, links)
