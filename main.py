@@ -7,8 +7,6 @@ from datetime import datetime
 from random import choice
 from image_scraper import dwnld_imgs, users_to_scrape
 import glob
-import logging
-import argparse
 from dotenv import load_dotenv
 # https://github.com/ping/instagram_private_api
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0
