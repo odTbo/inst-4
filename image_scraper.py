@@ -5,7 +5,7 @@ from os import path, mkdir
 
 CWD = str(pathlib.Path(__file__).parent.absolute())
 
-# output = "output/"
+output = "output/"
 
 
 def blank_input(filename="to_scrape.txt"):
