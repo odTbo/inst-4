@@ -109,7 +109,7 @@ class Instagram:
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         # Fetch posts
         print(f"Scraping profile: {username}")
-        posts = self.fetch_posts(username=username, max_posts=999)
+        posts = self.fetch_posts(username=username, max_posts=9999)
         print(f"Posts to scrape: {len(posts)}")
         # Extract URLs
         urls = []
@@ -476,7 +476,7 @@ class Instagram:
         }
         logs = json.dumps(logs)
 
-        with open(LOGS_PATH + "actions_log.json", "a") as f:
+        with open(LOGS_PATH + "actions_log.txt", "a") as f:
             f.write(logs + "\n")
 
     def log_errors(self):
