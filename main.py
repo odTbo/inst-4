@@ -45,12 +45,13 @@ class Instagram:
         self.to_ignore = set()
         self.my_followers = set()
         self.expired_follows_file = ""
+        self.method = ""
         self.users = []
         self.actions = {
-            "Follow": 0,
-            "Unfollow": 0,
-            "Post Like": 0,
-            "Comments": 0
+            "follow": 0,
+            "unfollow": 0,
+            "post_like": 0,
+            "comment": 0
         }
         self.errors = []
 
@@ -62,6 +63,7 @@ class Instagram:
         to_scrape = users_to_scrape()
         if to_scrape:
             print("[IG] Scraper method")
+            self.method = "Scraper"
             for user in to_scrape:
                 try:
                     self.image_downloader(user)
@@ -75,10 +77,12 @@ class Instagram:
 
             if self.expired_lists():
                 print("[IG] Unfollow Method")
+                self.method = "Unfollow"
                 self.unfollow_method()
 
             else:
                 print("[IG] Follow Method")
+                self.method = "Follow"
                 follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
                 if follows_today:
 
@@ -97,6 +101,7 @@ class Instagram:
                     self.follow_method()
 
             print(f"Actions made in this session: {self.actions}")
+            self.log_actions()
             self.log_errors()
 
     # BONUS IMAGE DOWNLOADER
@@ -137,7 +142,7 @@ class Instagram:
             user = to_unfollow_list[0]
 
             # Reached set actions limit
-            if self.actions["Unfollow"] == 25:
+            if self.actions["unfollow"] == 25:
                 print(f"Reached {ACTIONS_LIMIT} unfollows limit.")
                 # Save the rest of users to original file
                 self.export_to_unfollow(to_unfollow_list, filename=self.expired_follows_file)
@@ -148,7 +153,7 @@ class Instagram:
                 try:
                     # Unfollow
                     if self.unfollow_user(user):
-                        self.actions["Unfollow"] += 1
+                        self.actions["unfollow"] += 1
                         time.sleep(2)
                         # Successful unfollow
                         to_unfollow_list.remove(user)
@@ -173,8 +178,6 @@ class Instagram:
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_follows_file)
 
-        self.log_actions(method="Unfollow")
-
     def follow_method(self):
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         # Fetch accounts to follow
@@ -187,7 +190,7 @@ class Instagram:
                 if self.follow_user(user["username"]):
                     time.sleep(2)
                     self.export_username(user["username"])
-                    self.actions["Follow"] += 1
+                    self.actions["follow"] += 1
                     # Like users posts
                     posts = self.fetch_posts(user["username"], step=2)
                     if posts:
@@ -205,8 +208,6 @@ class Instagram:
                 error_msg = f"FOLLOW ERROR {e} {user['username']}"
                 self.errors.append(error_msg)
                 self.export_username(user["username"], unfollow=False)
-
-        self.log_actions(method="Follow")
 
     def likes_for_followers(self):
         print("Liking posts of followers.")
@@ -329,7 +330,7 @@ class Instagram:
                 error_msg = f"POST LIKE ERROR {e}"
                 self.errors.append(error_msg)
             else:
-                self.actions["Post Like"] += 1
+                self.actions["post_like"] += 1
                 time.sleep(2)
 
     def follow_conditions(self, account):
@@ -463,17 +464,20 @@ class Instagram:
         else:
             print(f"The file '{filename}' doesn't exist.")
 
-    def log_actions(self, method):
+    def log_actions(self):
         """Logs the number of instagram actions made in a session."""
         date = DATETIME_TODAY.strftime("%d-%m-%YT%H:%M:00")
 
-        actions = ", ".join([f"{key}: {value}" for (key, value) in self.actions.items() if value != 0])
+        logs = {
+            "date": date,
+            "method": self.method,
+            "current_following": len(self.my_followers),
+            "actions": {key: value for (key, value) in self.actions.items() if value != 0}
+        }
+        logs = json.dumps(logs)
 
-        with open(LOGS_PATH + "actions_log.txt", "a") as f:
-            f.write(f"DATE: {date}, "
-                    f"METHOD: {method}, "
-                    f"CURRENT FOLLOWING: {len(self.my_followers)}, "
-                    f"ACTIONS: {actions}\n")
+        with open(LOGS_PATH + "actions_log.json", "a") as f:
+            f.write(logs + "\n")
 
     def log_errors(self):
         """Logs the errors encountered in a session."""
