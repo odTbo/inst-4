@@ -474,10 +474,11 @@ class Instagram:
             "current_following": len(self.my_followers),
             "actions": {key: value for (key, value) in self.actions.items() if value != 0}
         }
-        logs = json.dumps(logs)
+        if len(logs["actions"]) != 0:
+            logs = json.dumps(logs)
 
-        with open(LOGS_PATH + "actions_log.txt", "a") as f:
-            f.write(logs + "\n")
+            with open(LOGS_PATH + "actions_log.txt", "a") as f:
+                f.write(logs + "\n")
 
     def log_errors(self):
         """Logs the errors encountered in a session."""
