@@ -58,9 +58,9 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
-        print(self.api.username_info("itxx.rm"))
 
-        # test = self.fetch_following("vladimirpolak", all_=True)
+        # print(self.api.username_info("username"))
+        # test = self.fetch_following("username", all_=True)
         # print(len(test))
         # print(test)
         # for user in test:

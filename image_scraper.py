@@ -1,6 +1,7 @@
 import dload
 from concurrent.futures import ThreadPoolExecutor
 import pathlib
+import time
 from os import path, mkdir
 
 CWD = str(pathlib.Path(__file__).parent.absolute())
@@ -43,5 +44,9 @@ def dwnld_imgs(username, links):
         dload.save(url=link, path=f"{CWD}/" + account_dir + filename, overwrite=False)
 
     print("Downloading media...")
+    before = time.time()
     with ThreadPoolExecutor() as exector:
         exector.map(download_image, links)
+    after = time.time()
+    time_spent = round(after - before, 2)
+    print(f"Download took: {time_spent} seconds.")
