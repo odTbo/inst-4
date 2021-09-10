@@ -58,6 +58,14 @@ class Instagram:
     def session(self):
         self.logs_dir()
         self.login()
+        print(self.api.username_info("itxx.rm"))
+
+        # test = self.fetch_following("vladimirpolak", all_=True)
+        # print(len(test))
+        # print(test)
+        # for user in test:
+        #     if len(user["account_badges"]) != 0:
+        #         print(user)
 
         # Bonus image scraper
         to_scrape = users_to_scrape()
@@ -218,6 +226,31 @@ class Instagram:
                 self.like_posts(posts)
             else:
                 print(f"{user} has no posts.\n")
+
+    def fetch_following(self, target_account, all_=False):
+        """Grabs target account's following."""
+        # Get user_id and rank token
+        result = self.api.username_info(target_account)
+        user_id = result["user"]["pk"]
+        rank_token = self.api.generate_uuid()
+
+        users = []
+        if all_:
+            results = self.api.user_following(user_id, rank_token)
+
+            users.extend(results.get('users', []))
+
+            next_max_id = results.get('next_max_id')
+
+            while next_max_id:
+                time.sleep(4)
+                results = self.api.user_following(user_id, rank_token=rank_token, max_id=next_max_id)
+
+                users.extend(results.get('users', []))
+
+                next_max_id = results.get('next_max_id')
+
+            return users
 
     def fetch_followers(self, target_account, all_=False):
         """Grabs followers from target account."""
