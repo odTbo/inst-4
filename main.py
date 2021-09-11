@@ -342,12 +342,12 @@ class Instagram:
         posts = []
         results = self.api.user_feed(user_id)
         posts.extend(results.get('items', []))
-        if not len(posts) > max_posts:
+        if not len(posts) >= max_posts:
             next_max_id = results.get('next_max_id')
             while next_max_id:
                 results = self.api.user_feed(user_id, max_id=next_max_id)
                 posts.extend(results.get('items', []))
-                if len(posts) > max_posts:  # get only first 12 or so
+                if len(posts) >= max_posts:  # get only first 12 or so
                     break
                 next_max_id = results.get('next_max_id')
 
