@@ -219,7 +219,4 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    # ig.session()
-    test = [{'method': 'Unfollow', 'user': 'alessia.censotti', 'error': str(ClientError('Not Found'))}, {'method': 'Unfollow', 'user': 'i.euphoriia', 'error': str(ClientError('Not Found'))}]
-    ig.log_errors(test)
-
+    ig.session()
