@@ -270,4 +270,3 @@ class Instagram(Logs):
 
 if __name__ == "__main__":
     ig = Instagram()
-    print(ig.username, ig.password)

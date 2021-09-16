@@ -1,4 +1,3 @@
-# from modules.constants import ACTIONS_LIMIT
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.instagram_manager import Instagram as IgMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT
@@ -61,7 +60,7 @@ class Inst4(IgMixin, ScraperMixin):
                 if follows_today:
 
                     # To get 80-100 followers a day
-                    if 100 <= len(follows_today):
+                    if 80 <= len(follows_today):
                         print("Enough follows for today")
                     else:
                         print(f"Follows made today: {len(follows_today)}")
@@ -75,12 +74,16 @@ class Inst4(IgMixin, ScraperMixin):
                     self.follow_method()
 
             print(f"Actions made in this session: {self.actions}")
-            self.log_actions(
-                method=self.method,
-                actions=self.actions,
-                target_account=self.target_account,
-                current_following=len(self.my_followers)
-            )
+
+            logs = {
+                "method": self.method,
+                "actions": self.actions,
+                "current_following": len(self.my_followers)
+            }
+            if self.method == "Follow":
+                logs.update({"target_account": self.target_account})
+
+            self.log_actions(**logs)
             self.log_errors(self.errors)
 
         # BONUS IMAGE DOWNLOADER
@@ -216,4 +219,5 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    ig.session()
+    # ig.session()
+

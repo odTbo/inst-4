@@ -125,16 +125,3 @@ class LogsManager:
 
 if __name__ == "__main__":
     lm = LogsManager()
-    # actions = {
-    #     "follow": 24,
-    #     "unfollow": 0,
-    #     "post_like": 81,
-    #     "comment": 0
-    # }
-    # lm.log_actions(
-    #     method="Follow",
-    #     actions=actions,
-    #     target_account="soulhoe",
-    #     current_following=451
-    # )
-    # lm.export_username("vladimirpolak")

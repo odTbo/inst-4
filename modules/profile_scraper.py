@@ -1,5 +1,5 @@
 import dload
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor
 from modules.constants import SCRAPER_OUTPUT
 from pathlib import Path
 
@@ -76,7 +76,4 @@ class ProfileScraperMixin:
 
 
 if __name__ == "__main__":
-    # scraper = ProfileScraperMixin()
-    # links = ['https://instagram.fbts3-1.fna.fbcdn.net/v/t51.2885-19/s150x150/229154268_290380529506535_4859749332379506983_n.jpg?_nc_ht=instagram.fbts3-1.fna.fbcdn.net&_nc_ohc=07lo4w7aDhgAX_dIsvN&edm=AKralEIBAAAA&ccb=7-4&oh=302d58c3c2e0b9ba46bbad7fc7bc9954&oe=6146B67F&_nc_sid=5e3072']
-    # scraper.dwnld_imgs("itxx.rm", links)
-    pass
+    scraper = ProfileScraperMixin()
