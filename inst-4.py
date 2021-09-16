@@ -145,7 +145,7 @@ class Inst4(IgMixin, ScraperMixin):
                     error_msg = {
                         "method": self.method,
                         "user": user,
-                        "error": e
+                        "error": str(e)
                     }
                     print(error_msg)
                     self.errors.append(error_msg)
@@ -185,7 +185,7 @@ class Inst4(IgMixin, ScraperMixin):
                                     "method": self.method,
                                     "action": "post_like",
                                     "post": post["id"],
-                                    "error": e
+                                    "error": str(e)
                                 }
                                 print(error_msg)
                                 self.errors.append(error_msg)
@@ -210,7 +210,7 @@ class Inst4(IgMixin, ScraperMixin):
                         "username": user["username"],
                         "user_id": user["pk"]
                     },
-                    "error": e
+                    "error": str(e)
                 }
                 print(error_msg)
                 self.errors.append(error_msg)
@@ -220,4 +220,6 @@ class Inst4(IgMixin, ScraperMixin):
 if __name__ == "__main__":
     ig = Inst4()
     # ig.session()
+    test = [{'method': 'Unfollow', 'user': 'alessia.censotti', 'error': str(ClientError('Not Found'))}, {'method': 'Unfollow', 'user': 'i.euphoriia', 'error': str(ClientError('Not Found'))}]
+    ig.log_errors(test)
 
