@@ -1,11 +1,9 @@
 from modules.utils import *
 from modules.logs_manager import LogsManager as Logs
 from modules.constants import *
-import time
 from pathlib import Path
 import datetime
 from os import path, getenv
-from dotenv import load_dotenv
 # https://github.com/ping/instagram_private_api
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0 --upgrade
@@ -22,8 +20,6 @@ except ImportError:
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
-load_dotenv()
-
 
 class Instagram(Logs):
     def __init__(self):
@@ -31,7 +27,10 @@ class Instagram(Logs):
         self.password = getenv("IG_PASSWORD")
         self.target_account = getenv("TARGET_ACCOUNT")
         self.settings_filename = "ig_credentials.json"
-        self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
+        try:
+            self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
+        except TypeError:
+            self.to_ignore = set()
         self.users = []
         self.my_followers = set()
         self.__login()

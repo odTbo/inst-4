@@ -2,6 +2,7 @@ from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.instagram_manager import Instagram as IgMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT
 from modules.utils import timeout
+from dotenv import load_dotenv
 from os import path
 try:
     from instagram_private_api import ClientError
@@ -10,14 +11,12 @@ except ImportError:
     sys.path.append(path.join(path.dirname(__file__), '..'))
     from instagram_private_api import ClientError
 
+load_dotenv()
+
 
 class Inst4(IgMixin, ScraperMixin):
     def __init__(self):
         super().__init__()
-        try:
-            self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
-        except TypeError:
-            self.to_ignore = set()
         self.method = ""
         self.actions = {
             "follow": 0,
@@ -219,4 +218,5 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    ig.session()
+    print(ig.username, ig.password)
+    # ig.session()
