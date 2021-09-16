@@ -218,5 +218,4 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    print(ig.username, ig.password)
-    # ig.session()
+    ig.session()
