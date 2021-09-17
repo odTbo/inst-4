@@ -2,6 +2,7 @@ from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.instagram_manager import Instagram as IgMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
 from modules.utils import timeout
+from dotenv import load_dotenv
 from os import path
 try:
     from instagram_private_api import ClientError
@@ -10,14 +11,12 @@ except ImportError:
     sys.path.append(path.join(path.dirname(__file__), '..'))
     from instagram_private_api import ClientError
 
+load_dotenv()
+
 
 class Inst4(IgMixin, ScraperMixin):
     def __init__(self):
         super().__init__()
-        try:
-            self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
-        except TypeError:
-            self.to_ignore = set()
         self.method = ""
         self.actions = {
             "follow": 0,
@@ -39,9 +38,12 @@ class Inst4(IgMixin, ScraperMixin):
                 try:
                     self.image_downloader(user)
                 except ClientError as e:
-                    print(e)
-                    print(f"Private profile: {user}")
-                    # TODO Request a follow, save username
+                    error = str(e)
+                    print(error, user)
+                    if "Not authorized to view user" in error:
+                        self.follow_user(user)
+                        self.export_username(user, scrape=True)
+                        # TODO Request a follow, save username
 
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
@@ -171,7 +173,7 @@ class Inst4(IgMixin, ScraperMixin):
                 if self.follow_user(user["pk"]):
                     print(f"Followed user: {user['username']}")
                     timeout()
-                    self.export_username(user["pk"])
+                    self.export_username(user["pk"], unfollow=True, ignore=True)
                     self.actions["follow"] += 1
                     # Like users posts
                     posts = self.fetch_posts(user["pk"], step=2)
@@ -189,8 +191,6 @@ class Inst4(IgMixin, ScraperMixin):
                                 }
                                 print(error_msg)
                                 self.errors.append(error_msg)
-                                # Ignore user next time
-                                self.export_username(user["pk"], unfollow=False)
                             else:
                                 self.actions["post_like"] += 1
                                 timeout()
@@ -215,7 +215,7 @@ class Inst4(IgMixin, ScraperMixin):
                 }
                 print(error_msg)
                 self.errors.append(error_msg)
-                self.export_username(user["username"], unfollow=False)
+                self.export_username(user["username"], ignore=True)
 
 
 if __name__ == "__main__":

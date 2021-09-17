@@ -1,11 +1,9 @@
 from modules.utils import *
 from modules.logs_manager import LogsManager as Logs
 from modules.constants import *
-import time
 from pathlib import Path
 import datetime
 from os import path, getenv
-from dotenv import load_dotenv
 # https://github.com/ping/instagram_private_api
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0 --upgrade
@@ -22,8 +20,6 @@ except ImportError:
         ClientCookieExpiredError, ClientLoginRequiredError,
         __version__ as client_version)
 
-load_dotenv()
-
 
 class Instagram(Logs):
     def __init__(self):
@@ -31,7 +27,10 @@ class Instagram(Logs):
         self.password = getenv("IG_PASSWORD")
         self.target_account = getenv("TARGET_ACCOUNT")
         self.settings_filename = "ig_credentials.json"
-        self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
+        try:
+            self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
+        except TypeError:
+            self.to_ignore = set()
         self.users = []
         self.my_followers = set()
         self.__login()
@@ -234,35 +233,17 @@ class Instagram(Logs):
 
         return posts[:max_posts:step]
 
-    # def like_post(self, post):
-    #     """Likes user's posts. Input is list of post objects."""
-    #     self.api.post_like(post["id"])
-        # for post in posts:
-        #     # Like post
-        #     try:
-        #         self.api.post_like(post["id"])
-        #     except Exception as e:
-        #         error_msg = f"POST LIKE ERROR {e}"
-        #         self.errors.append(error_msg)
-        #     else:
-        #         self.actions["post_like"] += 1
-        #         time.sleep(2)
-
     def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
-        # print(account["username"], account["is_private"], account["has_anonymous_profile_picture"])
 
         # Account can't be private
         if account["is_private"]:
-            # print(f"Private account: {account['username']}")
             return False
         # Account can't have anonymous profile picture
         elif account["has_anonymous_profile_picture"]:
-            # print(f"Has anonymous pfp: {account['username']}")
             return False
         # Account was interacted with in the past already
         elif account["username"] in self.to_ignore:
-            # print(f"Account to ignore: {account['username']}")
             return False
         else:
             return True
