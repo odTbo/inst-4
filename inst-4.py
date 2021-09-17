@@ -146,6 +146,7 @@ class Inst4(IgMixin, ScraperMixin):
                 except ClientError as e:
                     # error_msg = f"UNFOLLOW ERROR {e} {user}"
                     error_msg = {
+                        "date": DATE_STR,
                         "method": self.method,
                         "user": user,
                         "error": str(e)
@@ -185,6 +186,7 @@ class Inst4(IgMixin, ScraperMixin):
                                 self.api.post_like(post["id"])
                             except ClientError as e:
                                 error_msg = {
+                                    "date": DATE_STR,
                                     "method": self.method,
                                     "action": "post_like",
                                     "post": post["id"],
@@ -206,6 +208,7 @@ class Inst4(IgMixin, ScraperMixin):
             except ClientError as e:
                 # error_msg = f"FOLLOW ERROR {e} {user['username']}"
                 error_msg = {
+                    "date": DATE_STR,
                     "method": self.method,
                     "action": "follow",
                     "user": {

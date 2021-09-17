@@ -119,6 +119,7 @@ class LogsManager:
             if path.exists():
                 with path.open(mode="a") as f:
                     f.write(formatted)
+                    f.write("\n")
                     # f.write('\n'.join(errors))
                     # f.write('\n')
             # TODO Make error logs file json
