@@ -1,5 +1,5 @@
 from datetime import datetime
-from os import remove, mkdir
+from os import remove
 import glob
 import json
 from pathlib import Path

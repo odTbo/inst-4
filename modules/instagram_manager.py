@@ -233,6 +233,38 @@ class Instagram(Logs):
 
         return posts[:max_posts:step]
 
+    # TODO not fully functional yet
+    def fetch_user_saved(self, max_posts=12, _all=False):
+        """Fetch self.user's saved feed."""
+        # Fetch Posts
+        posts = []
+
+        results = self.api.saved_feed()
+        posts.extend([item["media"] for item in results.get("items", [])])
+        next_max_id = results.get('next_max_id')
+
+        if _all:
+            while next_max_id:
+                timeout()
+                results = self.api.saved_feed(max_id=next_max_id)
+                posts.extend([item["media"] for item in results.get("items", [])])
+                next_max_id = results.get('next_max_id')
+
+            return posts
+
+        else:
+            if len(posts) < max_posts:
+                while next_max_id:
+                    timeout()
+                    results = self.api.saved_feed(max_id=next_max_id)
+                    posts.extend([item["media"] for item in results.get("items", [])])
+
+                    if len(posts) > max_posts:
+                        break
+                    next_max_id = results.get('next_max_id')
+
+            return posts[:max_posts]
+
     def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
 

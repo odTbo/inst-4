@@ -225,3 +225,12 @@ class Inst4(IgMixin, ScraperMixin):
 if __name__ == "__main__":
     ig = Inst4()
     ig.session()
+
+    # # Download saved feed (wip)
+    # posts = ig.fetch_user_saved(max_posts=10)
+    # urls = ig.extract_urls(posts)
+    # ig.dwnld_imgs(ig.username, urls)
+    # posts = ig.fetch_user_saved(_all=True)
+    # posts = [post['id'] for post in posts]
+    # print(len(posts))
+    # print(posts)
