@@ -1,6 +1,6 @@
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.instagram_manager import Instagram as IgMixin
-from modules.constants import DATE_STR, ACTIONS_LIMIT
+from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
 from modules.utils import timeout
 from os import path
 try:
@@ -60,7 +60,7 @@ class Inst4(IgMixin, ScraperMixin):
                 if follows_today:
 
                     # To get 80-100 followers a day
-                    if 80 <= len(follows_today):
+                    if FOLLOWS_PER_DAY <= len(follows_today):
                         print("Enough follows for today")
                     else:
                         print(f"Follows made today: {len(follows_today)}")
@@ -192,6 +192,7 @@ class Inst4(IgMixin, ScraperMixin):
                                 # Ignore user next time
                                 self.export_username(user["pk"], unfollow=False)
                             else:
+                                self.actions["post_like"] += 1
                                 timeout()
                     else:
                         print(f"{user['username']} has no posts.")
