@@ -233,35 +233,17 @@ class Instagram(Logs):
 
         return posts[:max_posts:step]
 
-    # def like_post(self, post):
-    #     """Likes user's posts. Input is list of post objects."""
-    #     self.api.post_like(post["id"])
-        # for post in posts:
-        #     # Like post
-        #     try:
-        #         self.api.post_like(post["id"])
-        #     except Exception as e:
-        #         error_msg = f"POST LIKE ERROR {e}"
-        #         self.errors.append(error_msg)
-        #     else:
-        #         self.actions["post_like"] += 1
-        #         time.sleep(2)
-
     def follow_conditions(self, account):
         """Checks against conditions in order to follow the account."""
-        # print(account["username"], account["is_private"], account["has_anonymous_profile_picture"])
 
         # Account can't be private
         if account["is_private"]:
-            # print(f"Private account: {account['username']}")
             return False
         # Account can't have anonymous profile picture
         elif account["has_anonymous_profile_picture"]:
-            # print(f"Has anonymous pfp: {account['username']}")
             return False
         # Account was interacted with in the past already
         elif account["username"] in self.to_ignore:
-            # print(f"Account to ignore: {account['username']}")
             return False
         else:
             return True
