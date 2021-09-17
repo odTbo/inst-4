@@ -13,7 +13,10 @@ class LogsManager:
     """Class responsible for manipulating usernames and session logs/errors locally."""
     expired_list = ""
 
-    def export_username(self, username, unfollow=True, ignore=True):
+    def export_username(self, username,
+                        unfollow=False,
+                        ignore=False,
+                        scrape=False):
         """Saves followed user to unfollow list and to ignore list, to prevent future interaction with the account."""
 
         # Save to unfollow list
@@ -25,6 +28,12 @@ class LogsManager:
         # Save to ignore list
         if ignore:
             path = LOGS_PATH / "to_ignore.txt"
+            with path.open(mode="a") as f:
+                f.write(f"{username}\n")
+
+        # Save scrape list
+        if scrape:
+            path = Path.cwd() / "to_scrape.txt"
             with path.open(mode="a") as f:
                 f.write(f"{username}\n")
 
