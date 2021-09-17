@@ -221,7 +221,7 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    # ig.session()
+    ig.session()
 
     # # Download saved feed (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
