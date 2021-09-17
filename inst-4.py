@@ -89,14 +89,15 @@ class Inst4(IgMixin, ScraperMixin):
             self.log_errors(self.errors)
 
         # BONUS IMAGE DOWNLOADER
-    def image_downloader(self, username, num_posts=9999):
+    def image_downloader(self, username, download_posts=9999):
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
-        # Fetch posts
         print(f"Scraping profile: {username}")
 
-        posts = self.fetch_posts(username=username, max_posts=num_posts)
+        # Fetch posts
+        posts = self.fetch_posts(username=username, max_posts=download_posts)
         print(f"Posts to scrape: {len(posts)}")
 
+        # Extract URLs from all posts
         urls = self.extract_urls(posts)
         print(f"Media to download: {len(urls)}")
 
