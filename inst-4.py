@@ -47,21 +47,22 @@ class Inst4(IgMixin, ScraperMixin):
 
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
-            # print(len(self.my_followers))
-            # print(self.my_followers)
 
+            # Unfollow list ready
             if self.expired_lists():
                 print("[IG] Unfollow Method")
                 self.method = "Unfollow"
                 self.unfollow_method()
 
+            # Follow more people
             else:
                 print("[IG] Follow Method")
                 self.method = "Follow"
+
                 follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
                 if follows_today:
 
-                    # To get 80-100 followers a day
+                    # To get FOLLOWS_PER_DAY followers a day
                     if FOLLOWS_PER_DAY <= len(follows_today):
                         print("Enough follows for today")
                     else:
@@ -70,8 +71,6 @@ class Inst4(IgMixin, ScraperMixin):
                         self.follow_method()
                 else:
                     print("No follows yet today.")
-                    # Likes first post of each follower
-                    # self.likes_for_followers()
 
                     self.follow_method()
 
