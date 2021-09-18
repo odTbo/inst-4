@@ -181,12 +181,12 @@ class Inst4(IgMixin, ScraperMixin):
                         print(f"Liking posts for {user['username']}.")
                         for post in posts:
                             try:
-                                self.api.post_like(post["id"])
+                                self.api.post_like(post["pk"])
                             except ClientError as e:
                                 error_msg = {
                                     "method": self.method,
                                     "action": "post_like",
-                                    "post": post["id"],
+                                    "post": post["pk"],
                                     "error": str(e)
                                 }
                                 print(error_msg)

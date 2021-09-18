@@ -277,6 +277,8 @@ class Instagram(Logs):
         # Account was interacted with in the past already
         elif account["username"] in self.to_ignore:
             return False
+        elif str(account["pk"]) in self.to_ignore:
+            return False
         else:
             return True
 

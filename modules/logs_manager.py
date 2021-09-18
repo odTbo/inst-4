@@ -114,11 +114,14 @@ class LogsManager:
     def log_errors(self, errors):
         """Logs the errors encountered in a session."""
         path = LOGS_PATH / "errors_log.txt"
-        formatted = json.dumps(errors)
+        dt = DATETIME_TODAY.replace(microsecond=0).isoformat()
+
+        formatted = json.dumps({dt: errors})
         if len(errors) != 0:
             if path.exists():
                 with path.open(mode="a") as f:
                     f.write(formatted)
+                    f.write("\n")
                     # f.write('\n'.join(errors))
                     # f.write('\n')
             # TODO Make error logs file json
