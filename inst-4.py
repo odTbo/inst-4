@@ -36,7 +36,7 @@ class Inst4(IgMixin, ScraperMixin):
             self.method = "Scraper"
             for user in to_scrape:
                 try:
-                    self.image_downloader(user)
+                    self.scraper_method(user)
                 except ClientError as e:
                     error = str(e)
                     print(error, user)
@@ -88,7 +88,7 @@ class Inst4(IgMixin, ScraperMixin):
             self.log_errors(self.errors)
 
     # BONUS IMAGE DOWNLOADER
-    def image_downloader(self, username, download_posts=9999):
+    def scraper_method(self, username, download_posts=9999):
         """User's feed scraper script."""
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         print(f"Scraping profile: {username}")
@@ -106,6 +106,7 @@ class Inst4(IgMixin, ScraperMixin):
         self.dwnld_imgs(username, urls)
 
     def unfollow_method(self):
+        """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
         to_unfollow_list = self.fetch_users_from_file(self.expired_list)
 
         # While there are users to unfollow
@@ -163,6 +164,7 @@ class Inst4(IgMixin, ScraperMixin):
             self.remove_finished_file(filename=self.expired_list)
 
     def follow_method(self):
+        """Follow and like post's of followers from TARGET_ACCOUNT."""
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         # Fetch accounts to follow
         to_follow = self.fetch_followers(self.target_account)
