@@ -229,7 +229,7 @@ if __name__ == "__main__":
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
     # ig.dwnld_imgs(ig.username, urls)
-    # posts = ig.fetch_user_saved(_all=True)
+    # posts = ig.fetch_user_saved(all_=True)
     # posts = [post['id'] for post in posts]
     # print(len(posts))
     # print(posts)
