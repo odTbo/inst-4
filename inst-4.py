@@ -87,8 +87,9 @@ class Inst4(IgMixin, ScraperMixin):
             self.log_actions(**logs)
             self.log_errors(self.errors)
 
-        # BONUS IMAGE DOWNLOADER
+    # BONUS IMAGE DOWNLOADER
     def image_downloader(self, username, download_posts=9999):
+        """User's feed scraper script."""
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         print(f"Scraping profile: {username}")
 
