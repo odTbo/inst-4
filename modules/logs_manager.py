@@ -96,10 +96,10 @@ class LogsManager:
             target_account: (string)
             ...
         """
-        date = DATETIME_TODAY.strftime("%d-%m-%YT%H:%M:00")
+        dt = DATETIME_TODAY.replace(microsecond=0).isoformat()
 
         logs = {
-            "date": date,
+            "date": dt,
             "method": method,
             "actions": {key: value for (key, value) in actions.items() if value != 0}
         }
