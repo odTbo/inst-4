@@ -3,6 +3,7 @@ from modules.instagram_manager import Instagram as IgMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
 from modules.utils import timeout
 from dotenv import load_dotenv
+import time
 from os import path
 try:
     from instagram_private_api import ClientError
