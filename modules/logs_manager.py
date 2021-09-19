@@ -118,12 +118,11 @@ class LogsManager:
 
         formatted = json.dumps({dt: errors})
         if len(errors) != 0:
-            if path.exists():
-                with path.open(mode="a") as f:
-                    f.write(formatted)
-                    f.write("\n")
-                    # f.write('\n'.join(errors))
-                    # f.write('\n')
+            with path.open(mode="a") as f:
+                f.write(formatted)
+                f.write("\n")
+                # f.write('\n'.join(errors))
+                # f.write('\n')
             # TODO Make error logs file json
             # else:
 

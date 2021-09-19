@@ -46,7 +46,7 @@ class Inst4(IgMixin, ScraperMixin):
                         # TODO Request a follow, save username
 
         else:
-            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
+            self.my_followers = set(user["pk"] for user in self.fetch_followers(self.username, all_=True))
             # print(len(self.my_followers))
             # print(self.my_followers)
 
@@ -113,10 +113,10 @@ class Inst4(IgMixin, ScraperMixin):
 
             # Get the first user from the list
             user = to_unfollow_list[0]
-            # try:
-            #     user = int(user)
-            # except ValueError:
-            #     pass
+            try:
+                user = int(user)
+            except ValueError:
+                pass
 
             # Reached set actions limit
             if self.actions["unfollow"] == ACTIONS_LIMIT:
@@ -177,7 +177,7 @@ class Inst4(IgMixin, ScraperMixin):
                     self.export_username(user["pk"], unfollow=True, ignore=True)
                     self.actions["follow"] += 1
                     # Like users posts
-                    posts = self.fetch_posts(user["pk"], step=2)
+                    posts = self.fetch_posts(user["pk"], step=3)
                     if posts:
                         print(f"Liking posts for {user['username']}.")
                         for post in posts:
@@ -221,7 +221,12 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    ig.session()
+    # ig.session()
+    user_id = "6046752677"
+    info = ig.api.user_info(user_id)
+    print(info)
+    # r = ig.unfollow_user(user_id)
+    # print(r)
 
     # # Download saved feed (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
