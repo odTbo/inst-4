@@ -36,7 +36,7 @@ class Inst4(IgMixin, ScraperMixin):
             self.method = "Scraper"
             for user in to_scrape:
                 try:
-                    self.image_downloader(user)
+                    self.scraper_method(user)
                 except ClientError as e:
                     error = str(e)
                     print(error, user)
@@ -46,22 +46,23 @@ class Inst4(IgMixin, ScraperMixin):
                         # TODO Request a follow, save username
 
         else:
-            self.my_followers = set(user["pk"] for user in self.fetch_followers(self.username, all_=True))
-            # print(len(self.my_followers))
-            # print(self.my_followers)
+            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
 
+            # Unfollow list ready
             if self.expired_lists():
                 print("[IG] Unfollow Method")
                 self.method = "Unfollow"
                 self.unfollow_method()
 
+            # Follow more people
             else:
                 print("[IG] Follow Method")
                 self.method = "Follow"
+
                 follows_today = self.fetch_users_from_file(f"{DATE_STR}.txt")
                 if follows_today:
 
-                    # To get 80-100 followers a day
+                    # To get FOLLOWS_PER_DAY followers a day
                     if FOLLOWS_PER_DAY <= len(follows_today):
                         print("Enough follows for today")
                     else:
@@ -70,8 +71,6 @@ class Inst4(IgMixin, ScraperMixin):
                         self.follow_method()
                 else:
                     print("No follows yet today.")
-                    # Likes first post of each follower
-                    # self.likes_for_followers()
 
                     self.follow_method()
 
@@ -88,8 +87,9 @@ class Inst4(IgMixin, ScraperMixin):
             self.log_actions(**logs)
             self.log_errors(self.errors)
 
-        # BONUS IMAGE DOWNLOADER
-    def image_downloader(self, username, download_posts=9999):
+    # BONUS IMAGE DOWNLOADER
+    def scraper_method(self, username, download_posts=9999):
+        """User's feed scraper script."""
         # print(datetime.fromtimestamp(taken_at).strftime('%d-%m-%Y')) # Taken_at post timestamp to date
         print(f"Scraping profile: {username}")
 
@@ -106,6 +106,7 @@ class Inst4(IgMixin, ScraperMixin):
         self.dwnld_imgs(username, urls)
 
     def unfollow_method(self):
+        """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
         to_unfollow_list = self.fetch_users_from_file(self.expired_list)
 
         # While there are users to unfollow
@@ -113,10 +114,10 @@ class Inst4(IgMixin, ScraperMixin):
 
             # Get the first user from the list
             user = to_unfollow_list[0]
-            try:
-                user = int(user)
-            except ValueError:
-                pass
+            # try:
+            #     user = int(user)
+            # except ValueError:
+            #     pass
 
             # Reached set actions limit
             if self.actions["unfollow"] == ACTIONS_LIMIT:
@@ -163,6 +164,7 @@ class Inst4(IgMixin, ScraperMixin):
             self.remove_finished_file(filename=self.expired_list)
 
     def follow_method(self):
+        """Follow and like post's of followers from TARGET_ACCOUNT."""
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         # Fetch accounts to follow
         to_follow = self.fetch_followers(self.target_account)
@@ -177,7 +179,7 @@ class Inst4(IgMixin, ScraperMixin):
                     self.export_username(user["pk"], unfollow=True, ignore=True)
                     self.actions["follow"] += 1
                     # Like users posts
-                    posts = self.fetch_posts(user["pk"], step=3)
+                    posts = self.fetch_posts(user["pk"], step=2)
                     if posts:
                         print(f"Liking posts for {user['username']}.")
                         for post in posts:
@@ -221,18 +223,13 @@ class Inst4(IgMixin, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
-    # ig.session()
-    user_id = "6046752677"
-    info = ig.api.user_info(user_id)
-    print(info)
-    # r = ig.unfollow_user(user_id)
-    # print(r)
+    ig.session()
 
     # # Download saved feed (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
     # ig.dwnld_imgs(ig.username, urls)
-    # posts = ig.fetch_user_saved(_all=True)
+    # posts = ig.fetch_user_saved(all_=True)
     # posts = [post['id'] for post in posts]
     # print(len(posts))
     # print(posts)

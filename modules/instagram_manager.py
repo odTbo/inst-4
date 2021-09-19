@@ -234,7 +234,7 @@ class Instagram(Logs):
         return posts[:max_posts:step]
 
     # TODO not fully functional yet
-    def fetch_user_saved(self, max_posts=12, _all=False):
+    def fetch_user_saved(self, max_posts=12, all_=False):
         """Fetch self.user's saved feed."""
         # Fetch Posts
         posts = []
@@ -243,7 +243,7 @@ class Instagram(Logs):
         posts.extend([item["media"] for item in results.get("items", [])])
         next_max_id = results.get('next_max_id')
 
-        if _all:
+        if all_:
             while next_max_id:
                 timeout()
                 results = self.api.saved_feed(max_id=next_max_id)
