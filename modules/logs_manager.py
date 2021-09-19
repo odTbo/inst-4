@@ -40,8 +40,9 @@ class LogsManager:
     def export_to_unfollow(self, usernames, filename):
         """Saves remaining usernames (list) waiting for unfollow to the original file."""
         path = LOGS_PATH / filename
+        to_write = [str(line) for line in usernames]
         with path.open(mode="w") as f:
-            f.write('\n'.join(usernames))
+            f.write('\n'.join(to_write))
             f.write('\n')
 
     def expired_lists(self):

@@ -3,7 +3,6 @@ from modules.instagram_manager import Instagram as IgMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
 from modules.utils import timeout
 from dotenv import load_dotenv
-import time
 from os import path
 try:
     from instagram_private_api import ClientError
@@ -108,17 +107,13 @@ class Inst4(IgMixin, ScraperMixin):
 
     def unfollow_method(self):
         """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
-        to_unfollow_list = self.fetch_users_from_file(self.expired_list)
+        to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
 
         # While there are users to unfollow
         while len(to_unfollow_list) != 0:
 
-            # Get the first user from the list
+            # Get the first id from the list
             user = to_unfollow_list[0]
-            # try:
-            #     user = int(user)
-            # except ValueError:
-            #     pass
 
             # Reached set actions limit
             if self.actions["unfollow"] == ACTIONS_LIMIT:
@@ -131,7 +126,6 @@ class Inst4(IgMixin, ScraperMixin):
             elif user not in self.my_followers:
                 try:
                     # Unfollow
-                    # assert type(user) == int
                     if self.unfollow_user(user):
                         self.actions["unfollow"] += 1
                         timeout()
