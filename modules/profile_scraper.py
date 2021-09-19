@@ -1,7 +1,16 @@
 import dload
 # from concurrent.futures import ThreadPoolExecutor
+from progressbar import ProgressBar, Bar, Percentage
 from modules.constants import SCRAPER_OUTPUT
 from pathlib import Path
+
+
+def progressbar(max_val):
+    bar = ProgressBar(
+        maxval=max_val,
+        widgets=[Bar('=', '[', ']'), ' ', Percentage()]
+    )
+    return bar
 
 
 class ProfileScraperMixin:
@@ -63,14 +72,22 @@ class ProfileScraperMixin:
     def dwnld_imgs(self, username, links):
         self.output_dir(username)
 
+        pbar = progressbar(len(links))
+
         def download_image(link):
             filename = link.split("?")[0].split("/")[-1]
             path = Path().cwd() / SCRAPER_OUTPUT / username / filename
             dload.save(url=link,
                        path=str(path.absolute()),
                        overwrite=False)
-        for url in links:
+        progress = 0
+        pbar.start()
+        for url in pbar(links):
             download_image(url)
+            progress += 1
+            pbar.update(progress)
+        pbar.finish()
+
         # with ThreadPoolExecutor() as exector:
         #     exector.map(download_image, links)
 
