@@ -9,7 +9,7 @@ from modules.constants import DATE_STR, DATETIME_TODAY
 LOGS_PATH = Path().cwd() / "logs"
 
 
-class LogsManager:
+class LogsMixin:
     """Class responsible for manipulating usernames and session logs/errors locally."""
     expired_list = ""
 

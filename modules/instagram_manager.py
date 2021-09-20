@@ -1,5 +1,5 @@
 from modules.utils import *
-from modules.logs_manager import LogsManager as Logs
+from modules.logs_manager import LogsMixin
 from modules.constants import *
 from pathlib import Path
 import datetime
@@ -21,7 +21,7 @@ except ImportError:
         __version__ as client_version)
 
 
-class Instagram(Logs):
+class Instagram(LogsMixin):
     def __init__(self):
         self.username = getenv("IG_USERNAME")
         self.password = getenv("IG_PASSWORD")

@@ -1,5 +1,5 @@
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
-from modules.instagram_manager import Instagram as IgMixin
+from modules.instagram_manager import Instagram
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
 from modules.utils import timeout
 from dotenv import load_dotenv
@@ -14,7 +14,7 @@ except ImportError:
 load_dotenv()
 
 
-class Inst4(IgMixin, ScraperMixin):
+class Inst4(Instagram, ScraperMixin):
     def __init__(self):
         super().__init__()
         self.method = ""
@@ -43,7 +43,6 @@ class Inst4(IgMixin, ScraperMixin):
                     if "Not authorized to view user" in error:
                         self.follow_user(user)
                         self.export_username(user, scrape=True)
-                        # TODO Request a follow, save username
 
         else:
             self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
