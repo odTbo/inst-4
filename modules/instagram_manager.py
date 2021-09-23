@@ -222,7 +222,7 @@ class Instagram(LogsMixin):
             posts.extend(results.get('items', []))
             next_max_id = results.get('next_max_id')
             while next_max_id:
-                print(len(posts))
+                # print(len(posts))
                 timeout()
 
                 results = self.api.user_feed(user_id, max_id=next_max_id)

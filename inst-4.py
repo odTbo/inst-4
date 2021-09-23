@@ -158,7 +158,7 @@ class Inst4(Instagram, ScraperMixin):
             self.remove_finished_file(filename=self.expired_list)
 
     def follow_method(self):
-        """Follow and like post's of followers from TARGET_ACCOUNT."""
+        """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
         self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         # Fetch accounts to follow
         to_follow = self.fetch_followers(self.target_account)
