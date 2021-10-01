@@ -8,6 +8,11 @@ from os import path, getenv
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0
 # pip install git+https://git@github.com/ping/instagram_private_api.git@1.6.0 --upgrade
 try:
+    from modules.device_info import my_settings
+except ImportError:
+    my_settings = {}
+
+try:
     from instagram_private_api import (
         Client, ClientError, ClientLoginError,
         ClientCookieExpiredError, ClientLoginRequiredError,
@@ -50,7 +55,8 @@ class Instagram(LogsMixin):
                 # login new
                 self.api = Client(
                     self.username, self.password,
-                    on_login=lambda x: onlogin_callback(x, settings_file), auto_patch=True)
+                    on_login=lambda x: onlogin_callback(x, settings_file), auto_patch=True,
+                    **my_settings)
             else:
                 with open(settings_file) as file_data:
                     cached_settings = json.load(file_data, object_hook=from_json)
@@ -60,7 +66,8 @@ class Instagram(LogsMixin):
                 # reuse auth settings
                 self.api = Client(
                     self.username, self.password,
-                    settings=cached_settings, auto_patch=True)
+                    settings=cached_settings, auto_patch=True,
+                    **my_settings)
 
         except (ClientCookieExpiredError, ClientLoginRequiredError) as e:
             print('ClientCookieExpiredError/ClientLoginRequiredError: {0!s}'.format(e))
@@ -70,7 +77,8 @@ class Instagram(LogsMixin):
             self.api = Client(
                 self.username, self.password,
                 device_id=device_id,
-                on_login=lambda x: onlogin_callback(x, settings_file), auto_patch=True)
+                on_login=lambda x: onlogin_callback(x, settings_file), auto_patch=True,
+                **my_settings)
 
         except ClientLoginError as e:
             print('ClientLoginError {0!s}'.format(e))

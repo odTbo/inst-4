@@ -217,6 +217,7 @@ class Inst4(Instagram, ScraperMixin):
 
 if __name__ == "__main__":
     ig = Inst4()
+    print(ig.api.user_agent)
     ig.session()
 
     # # Download saved feed (wip)
