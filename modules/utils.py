@@ -4,7 +4,7 @@ import time
 from random import uniform
 
 
-def timeout():
+def timeout() -> float:
     delay = round(uniform(4, 8), 5)
     time.sleep(delay)
     return delay

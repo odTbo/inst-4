@@ -15,7 +15,7 @@ def progressbar(max_val):
 
 class ProfileScraperMixin:
     """Holds functions for scraping an IG user posts."""
-    def extract_urls(self, posts):
+    def extract_urls(self, posts: list) -> list:
         """Extracts URLs from instagram user's posts"""
         urls = []
         for post in posts:
@@ -56,7 +56,7 @@ class ProfileScraperMixin:
             print(f"The file '{filename}' doesn't exist.")
             return None
 
-    def output_dir(self, username):
+    def output_dir(self, username: str):
         path = Path().cwd() / SCRAPER_OUTPUT
         if path.exists():
             pass
@@ -69,12 +69,12 @@ class ProfileScraperMixin:
         else:
             path.mkdir()
 
-    def dwnld_imgs(self, username, links):
+    def dwnld_imgs(self, username: str, links: list):
         self.output_dir(username)
 
         pbar = progressbar(len(links))
 
-        def download_image(link):
+        def download_image(link: str):
             filename = link.split("?")[0].split("/")[-1]
             path = Path().cwd() / SCRAPER_OUTPUT / username / filename
             dload.save(url=link,

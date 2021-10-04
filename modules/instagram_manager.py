@@ -95,7 +95,7 @@ class Instagram(LogsMixin):
         print('Cookie Expiry: {0!s}'.format(
             datetime.datetime.fromtimestamp(cookie_expiry).strftime('%Y-%m-%dT%H:%M:%SZ')))
 
-    def fetch_following(self, target_account, all_=False):
+    def fetch_following(self, target_account: str, all_=False) -> list:
         """Grabs target account's following."""
         # Get user_id and rank token
         result = self.api.username_info(target_account)
@@ -120,7 +120,7 @@ class Instagram(LogsMixin):
 
             return users
 
-    def get_user_id(self, username):
+    def get_user_id(self, username: str) -> int:
         try:
             result = self.api.username_info(username)
             user_id = result["user"]["pk"]
@@ -131,7 +131,7 @@ class Instagram(LogsMixin):
         else:
             return user_id
 
-    def fetch_followers(self, target_account, all_=False):
+    def fetch_followers(self, target_account: str, all_=False) -> list:
         """Grabs followers from target account."""
         # Get user_id and rank token
         user_id = self.get_user_id(target_account)
@@ -180,35 +180,33 @@ class Instagram(LogsMixin):
 
             return users[:ACTIONS_LIMIT]
 
-    def follow_user(self, username):
+    def follow_user(self, user_id: int) -> bool:
         """Follow IG User by username."""
-        if type(username) == int:
-            user_id = username
-        else:
-            # Get user_id
-            user_id = self.get_user_id(username)
+        # if type(username) == int:
+        #     user_id = username
+        # else:
+        #     # Get user_id
+        #     user_id = self.get_user_id(username)
 
         # Follow by user_id
         r = self.api.friendships_create(user_id)
         if r["status"] == "ok":
-            # print(f"[IG] Followed {username}.")
             return True
         else:
             print(r)
             return False
 
-    def unfollow_user(self, username):
+    def unfollow_user(self, user_id: int) -> bool:
         """Unfollow IG User by username."""
-        if type(username) == int:
-            user_id = username
-        else:
-            # Get user_id
-            user_id = self.get_user_id(username)
+        # if type(username) == int:
+        #     user_id = username
+        # else:
+        #     # Get user_id
+        #     user_id = self.get_user_id(username)
 
         # Unfollow by user_id
         r = self.api.friendships_destroy(user_id)
         if r["status"] == "ok":
-            print(f"[IG] Unfollowed {username}.")
             return True
         else:
             print(r)
@@ -243,7 +241,7 @@ class Instagram(LogsMixin):
         return posts[:max_posts:step]
 
     # TODO not fully functional yet
-    def fetch_user_saved(self, max_posts=12, all_=False):
+    def fetch_user_saved(self, max_posts=12, all_=False) -> list:
         """Fetch self.user's saved feed."""
         # Fetch Posts
         posts = []
@@ -274,7 +272,7 @@ class Instagram(LogsMixin):
 
             return posts[:max_posts]
 
-    def follow_conditions(self, account):
+    def follow_conditions(self, account: dict) -> bool:
         """Checks against conditions in order to follow the account."""
 
         # Account can't be private

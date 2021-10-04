@@ -114,7 +114,7 @@ class Inst4(Instagram, ScraperMixin):
             # Get the first id from the list
             user = to_unfollow_list[0]
 
-            # Reached set actions limit
+            # Reached user set limit
             if self.actions["unfollow"] == ACTIONS_LIMIT:
                 print(f"Reached session actions limit.")
                 # Save the rest of users to original file
@@ -130,6 +130,7 @@ class Inst4(Instagram, ScraperMixin):
                         timeout()
                         # Successful unfollow
                         to_unfollow_list.remove(user)
+
                     # Actions limited by instagram
                     else:
                         # Save the rest of users to original file

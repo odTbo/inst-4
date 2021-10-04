@@ -45,7 +45,7 @@ class LogsMixin:
             f.write('\n'.join(to_write))
             f.write('\n')
 
-    def expired_lists(self):
+    def expired_lists(self) -> bool:
         """Checks if there are lists atleast 4 days old to unfollow."""
         date_today = datetime.now()
 
@@ -68,9 +68,10 @@ class LogsMixin:
 
         return False
 
-    def fetch_users_from_file(self, filename):
+    def fetch_users_from_file(self, filename: str) -> list:
         """Grabs all usernames from a file and returns them as a list."""
         path = LOGS_PATH / filename
+        output = []
         if path.exists():
             with open(path, "r") as f:
                 output = [line.strip() for line in f.readlines()]
@@ -79,9 +80,9 @@ class LogsMixin:
         else:
             print(f"The file '{filename}' doesn't exist.")
 
-            return None
+            return output
 
-    def remove_finished_file(self, filename):
+    def remove_finished_file(self, filename: str) -> None:
         """Remove empty unfollow list file."""
         path = LOGS_PATH / filename
         if path.exists():
@@ -89,7 +90,7 @@ class LogsMixin:
         else:
             print(f"The file '{filename}' doesn't exist.")
 
-    def log_actions(self, method, actions, **kwargs):
+    def log_actions(self, method: str, actions: dict, **kwargs) -> None:
         """Logs the number of instagram actions made in a session.
             **kwargs:
             current_following: (int)
@@ -112,7 +113,7 @@ class LogsMixin:
             with path.open(mode="a") as f:
                 f.write(logs + "\n")
 
-    def log_errors(self, errors):
+    def log_errors(self, errors: list) -> None:
         """Logs the errors encountered in a session."""
         path = LOGS_PATH / "errors_log.txt"
         dt = DATETIME_TODAY.replace(microsecond=0).isoformat()
@@ -127,7 +128,7 @@ class LogsMixin:
             # TODO Make error logs file json
             # else:
 
-    def logs_dir_create(self):
+    def logs_dir_create(self) -> None:
         if LOGS_PATH.exists():
             pass
         else:
@@ -136,4 +137,4 @@ class LogsMixin:
 
 
 if __name__ == "__main__":
-    lm = LogsManager()
+    lm = LogsMixin()
