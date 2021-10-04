@@ -5,7 +5,7 @@ from datetime import datetime
 ACTIONS_LIMIT = choice(range(8, 22))
 
 # Approximate follows per day
-FOLLOWS_PER_DAY = 60
+FOLLOWS_PER_DAY = 70
 
 # Profile scraper output dir
 SCRAPER_OUTPUT = "Scraper Output"
