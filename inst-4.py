@@ -45,7 +45,7 @@ class Inst4(Instagram, ScraperMixin):
                         self.export_username(user, scrape=True)
 
         else:
-            self.my_followers = set(user["username"] for user in self.fetch_followers(self.username, all_=True))
+            self.my_followers = set(user["pk"] for user in self.fetch_followers(self.username, all_=True))
 
             # Unfollow list ready
             if self.expired_lists():
@@ -82,6 +82,8 @@ class Inst4(Instagram, ScraperMixin):
             }
             if self.method == "Follow":
                 logs.update({"target_account": self.target_account})
+            if self.method == "Unfollow":
+                logs.update({"from_file": self.expired_list})
 
             self.log_actions(**logs)
             self.log_errors(self.errors)
@@ -174,7 +176,7 @@ class Inst4(Instagram, ScraperMixin):
                     self.export_username(user["pk"], unfollow=True, ignore=True)
                     self.actions["follow"] += 1
                     # Like users posts
-                    posts = self.fetch_posts(user["pk"], step=2)
+                    posts = self.fetch_posts(user["pk"], step=3)
                     if posts:
                         print(f"Liking posts for {user['username']}.")
                         for post in posts:
