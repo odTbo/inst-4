@@ -1,9 +1,10 @@
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
-from modules.instagram_manager import Instagram
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
+from modules.instagram_manager import Instagram
 from modules.utils import timeout
 from dotenv import load_dotenv
 from os import path
+
 try:
     from instagram_private_api import ClientError
 except ImportError:
@@ -162,7 +163,6 @@ class Inst4(Instagram, ScraperMixin):
 
     def follow_method(self):
         """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
-        self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
         # Fetch accounts to follow
         to_follow = self.fetch_followers(self.target_account)
 
@@ -170,38 +170,9 @@ class Inst4(Instagram, ScraperMixin):
 
         for user in to_follow:
             try:
-                if self.follow_user(user["pk"]):
-                    print(f"Followed user: {user['username']}")
-                    timeout()
-                    self.export_username(user["pk"], unfollow=True, ignore=True)
-                    self.actions["follow"] += 1
-                    # Like users posts
-                    posts = self.fetch_posts(user["pk"], step=3)
-                    if posts:
-                        print(f"Liking posts for {user['username']}.")
-                        for post in posts:
-                            try:
-                                self.api.post_like(post["pk"])
-                            except ClientError as e:
-                                error_msg = {
-                                    "method": self.method,
-                                    "action": "post_like",
-                                    "post": post["pk"],
-                                    "error": str(e)
-                                }
-                                print(error_msg)
-                                self.errors.append(error_msg)
-                            else:
-                                self.actions["post_like"] += 1
-                                timeout()
-                    else:
-                        print(f"{user['username']} has no posts.")
-                    # self.like_posts(user["username"], step=2)
-                    print("\n")
-                else:
-                    print(f"Actions limited! Reached {self.actions} actions.")
-                    # Actions limited
-                    break
+                self.follow_user(user["pk"])
+                print(f"Followed user: {user['username']}")
+
             except ClientError as e:
                 # error_msg = f"FOLLOW ERROR {e} {user['username']}"
                 error_msg = {
@@ -213,9 +184,33 @@ class Inst4(Instagram, ScraperMixin):
                     },
                     "error": str(e)
                 }
-                print(error_msg)
                 self.errors.append(error_msg)
                 self.export_username(user["username"], ignore=True)
+
+            else:
+                timeout()
+                self.export_username(user["pk"], unfollow=True, ignore=True)
+                self.actions["follow"] += 1
+
+                # Like users posts
+                posts = self.fetch_posts(user["pk"], step=3)
+                if posts:
+                    print(f"Liking posts for {user['username']}.")
+                    for post in posts:
+                        try:
+                            self.api.post_like(post["pk"])
+                        except ClientError as e:
+                            error_msg = {
+                                "method": self.method,
+                                "action": "post_like",
+                                "post": post["pk"],
+                                "error": str(e)
+                            }
+                            print(error_msg)
+                            self.errors.append(error_msg)
+                        else:
+                            self.actions["post_like"] += 1
+                            timeout()
 
 
 if __name__ == "__main__":
@@ -223,6 +218,7 @@ if __name__ == "__main__":
     print(ig.api.user_agent)
     ig.session()
 
+    # print(ig.api.username_info("launchdsigns"))
     # # Download saved feed (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
