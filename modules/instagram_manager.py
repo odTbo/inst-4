@@ -180,7 +180,7 @@ class Instagram(LogsMixin):
 
             return users[:ACTIONS_LIMIT]
 
-    def follow_user(self, user_id: int) -> bool:
+    def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
         # if type(username) == int:
         #     user_id = username
@@ -191,10 +191,10 @@ class Instagram(LogsMixin):
         # Follow by user_id
         r = self.api.friendships_create(user_id)
         if r["status"] == "ok":
-            return True
+            pass
         else:
             print(r)
-            return False
+            raise ConnectionRefusedError
 
     def unfollow_user(self, user_id: int) -> bool:
         """Unfollow IG User by username."""

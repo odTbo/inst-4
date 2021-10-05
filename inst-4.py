@@ -187,6 +187,9 @@ class Inst4(Instagram, ScraperMixin):
                 self.errors.append(error_msg)
                 self.export_username(user["username"], ignore=True)
 
+            except ConnectionRefusedError:
+                self.export_username(user["username"], ignore=True)
+
             else:
                 timeout()
                 self.export_username(user["pk"], unfollow=True, ignore=True)
