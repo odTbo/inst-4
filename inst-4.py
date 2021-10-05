@@ -221,8 +221,17 @@ if __name__ == "__main__":
     print(ig.api.user_agent)
     ig.session()
 
-    # print(ig.api.username_info("launchdsigns"))
-    # # Download saved feed (wip)
+
+    # EDIT CAPTION
+    # posts = ig.fetch_posts(ig.username)
+    # post = posts[1]
+    # caption = post["caption"]["text"]
+    # caption += "hashtag"
+    # r = ig.api.edit_media(media_id=post["pk"], caption=caption)
+    # print(r)
+
+    # print(ig.api.username_info(""))
+    # DOWNLOAD SAVED FEED (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
     # ig.dwnld_imgs(ig.username, urls)
