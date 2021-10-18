@@ -5,6 +5,10 @@ from random import uniform
 
 
 def timeout() -> float:
+    """
+    Sleeps for 'delay' amount of time. (float between 4-8(s))
+    :return: delay
+    """
     delay = round(uniform(4, 8), 5)
     time.sleep(delay)
     return delay
