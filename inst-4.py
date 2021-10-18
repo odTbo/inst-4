@@ -28,6 +28,10 @@ class Inst4(Instagram, ScraperMixin):
         self.errors = []
 
     def session(self):
+        """
+        Decides the method for current session.
+        (Scrape/Follow/Unfollow)
+        """
         self.logs_dir_create()
 
         # Bonus image scraper
