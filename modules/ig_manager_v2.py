@@ -50,7 +50,7 @@ class Instagram(LogsMixin):
         }
         settings = {}
 
-        cached_settings = Path().cwd() / "cached_settings.json"
+        cached_settings = Path().cwd().parent / "cached_settings.json"
 
         # if saved settings, login with saved settings
         if cached_settings.exists():
