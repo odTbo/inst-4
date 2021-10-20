@@ -54,19 +54,18 @@ class Instagram(LogsMixin):
 
         # if saved settings, login with saved settings
         if cached_settings.exists():
-            api = Client()
-            api.load_settings(cached_settings)
-            api.login(self.username, self.password)
+            self.api = Client()
+            self.api.load_settings(cached_settings)
 
         # else new login and save settings
         else:
             settings["device_settings"] = custom_settings
             settings["user_agent"] = my_settings["user_agent"]
 
-            api = Client(settings)
-            api.login(self.username, self.password)
+            self.api = Client(settings)
+            self.api.login(self.username, self.password)
 
-            api.dump_settings(cached_settings)
+            self.api.dump_settings(cached_settings)
 
     def fetch_following(self, target_account: str, all_=False) -> list:
         """Grabs target account's following."""
@@ -118,4 +117,6 @@ class Instagram(LogsMixin):
 if __name__ == "__main__":
     ig = Instagram()
     ig.login()
+    acc_info = ig.api.account_info()
+    print(acc_info.username)
 
