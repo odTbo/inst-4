@@ -3,6 +3,7 @@ from modules.logs_manager import LogsMixin
 from dotenv import load_dotenv
 from modules.constants import *
 from pathlib import Path
+from instagrapi.types import UserShort
 import datetime
 from os import path, getenv
 from instagrapi import Client
@@ -96,9 +97,14 @@ class Instagram(LogsMixin):
     def fetch_followers(self, target_account: int, all_=False) -> list:
         """Grabs followers from target account."""
         users = self.api.user_followers(user_id=target_account, amount=50)
+        output = []
+        for user in users:
+            if self.follow_conditions(users[user]):
+                output.append(users[user])
 
+        print("Number of eligible users: {}".format(len(output)))
 
-        return users
+        return output
 
     def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
@@ -117,19 +123,19 @@ class Instagram(LogsMixin):
         """Fetch self.user's saved feed."""
 
 
-    def follow_conditions(self, account: dict) -> bool:
+    def follow_conditions(self, account: UserShort) -> bool:
         """Checks against conditions in order to follow the account."""
 
         # Account can't be private
-        if account["is_private"]:
+        if account.is_private:
             return False
         # Account can't have anonymous profile picture
-        elif account["has_anonymous_profile_picture"]:
-            return False
+        # elif account["has_anonymous_profile_picture"]:
+        #     return False
         # Account was interacted with in the past already
-        elif account["username"] in self.to_ignore:
+        elif account.username in self.to_ignore:
             return False
-        elif str(account["pk"]) in self.to_ignore:
+        elif str(account.pk) in self.to_ignore:
             return False
         else:
             return True
@@ -141,4 +147,5 @@ if __name__ == "__main__":
 
     user_id = ig.api.user_id_from_username("soulhoe")
     users = ig.fetch_followers(user_id)
+    print(users)
 
