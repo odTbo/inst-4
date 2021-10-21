@@ -104,19 +104,27 @@ class Instagram(LogsMixin):
         # self.api.user_id_from_username()
         pass
 
-    def fetch_followers(self, user_id: int, all_=False, amount: int = 50) -> list:
+    def fetch_followers(self, user_id: int, all_=False, amount: int = 80) -> list:
         """Grabs followers from target account."""
         # Get first batch of users
         selected_users = []
         max_id = ""
         while len(selected_users) < amount:
             r = self.api.user_followers_v1_chunk(user_id, max_amount=100, max_id=max_id)
-            users = r[0]
-            max_id = r[1]
+            users = r[0] # List of users from tuple
+            max_id = r[1] # result's max_id from tuple
+
+            assert len(users) != 0, "Didn't find any followers"
+
             for u in users:
                 if self.follow_conditions(u) and u not in selected_users:
                     selected_users.append(u)
 
+                if len(selected_users) == amount:
+                    return selected_users
+
+            if not max_id:
+                return selected_users
 
 
     def follow_user(self, user_id: int) -> None:
@@ -153,7 +161,10 @@ class Instagram(LogsMixin):
 if __name__ == "__main__":
     ig = Instagram()
     ig.login()
-
+    user_id = ig.api.user_id_from_username("soulhoe")
+    users = ig.fetch_followers(user_id)
+    print(len(users))
+    print(users)
     #
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
     #
