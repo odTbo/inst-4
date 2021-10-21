@@ -71,7 +71,6 @@ class Instagram(LogsMixin):
 
         return output
 
-
     def custom_settings(self):
         """Creates custom device settings for client if provided."""
         if UserSettings:
@@ -108,13 +107,11 @@ class Instagram(LogsMixin):
     def fetch_followers(self, user_id: int, all_=False) -> list:
         """Grabs followers from target account."""
 
-
     def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
 
     def unfollow_user(self, user_id: int) -> bool:
         """Unfollow IG User by username."""
-
 
     def fetch_posts(self, user_id: int, max_posts=12, step=1):
         """Fetch User's posts."""
@@ -122,11 +119,9 @@ class Instagram(LogsMixin):
 
         return media[::step]
 
-
     # TODO not fully functional yet
     def fetch_user_saved(self, max_posts=12, all_=False) -> list:
         """Fetch self.user's saved feed."""
-
 
     def follow_conditions(self, account: UserShort) -> bool:
         """Checks against conditions in order to follow the account."""
@@ -137,9 +132,7 @@ class Instagram(LogsMixin):
         #     return False
 
         # Account was interacted with in the past already
-        elif account.username in self.to_ignore:
-            return False
-        elif str(account.pk) in self.to_ignore:
+        elif account.username in self.ignored_users or account.pk in self.ignored_users:
             return False
         else:
             return True
