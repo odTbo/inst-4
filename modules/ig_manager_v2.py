@@ -140,7 +140,8 @@ class Instagram(LogsMixin):
 
 if __name__ == "__main__":
     ig = Instagram()
-    # ig.login()
+    ig.login()
+
     #
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
     #
@@ -148,4 +149,4 @@ if __name__ == "__main__":
     #
     # users = ig.fetch_followers(user_id)
     # print(users)
-    print(ig.ignored_users)
+    # print(ig.ignored_users)
