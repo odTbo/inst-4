@@ -53,11 +53,13 @@ class Instagram(LogsMixin):
             print("New login session.")
             if custom_settings:
                 self.api = Client(custom_settings)
+                self.api.set_country(UserSettings.COUNTRY)
+                self.api.set_locale(UserSettings.LOCALE)
+                self.api.set_timezone_offset(UserSettings.TIMEZONE_OFFSET)
 
             self.api.login(self.username, self.password)
 
             self.api.dump_settings(cached_settings)
-
 
     def custom_settings(self):
         """Creates custom device settings for client if provided."""
@@ -79,7 +81,6 @@ class Instagram(LogsMixin):
             }
             return settings
         return None
-
 
     def fetch_following(self, target_account: str, all_=False) -> list:
         """Grabs target account's following."""
@@ -145,7 +146,9 @@ if __name__ == "__main__":
     ig = Instagram()
     ig.login()
 
-    user_id = ig.api.user_id_from_username("soulhoe")
-    users = ig.fetch_followers(user_id)
-    print(users)
+    # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
+
+    # user_id = ig.api.user_id_from_username("soulhoe")
+    # users = ig.fetch_followers(user_id)
+    # print(users)
 
