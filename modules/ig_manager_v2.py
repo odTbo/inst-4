@@ -23,10 +23,7 @@ class Instagram(LogsMixin):
         self.password = getenv("IG_PASSWORD")
         # self.target_account = getenv("TARGET_ACCOUNT")
         self.settings_filename = "ig_credentials.json"
-        try:
-            self.to_ignore = set(self.fetch_users_from_file("to_ignore.txt"))
-        except TypeError:
-            self.to_ignore = set()
+        self.ignored_users = self.to_ignore()
         self.users = []
         self.my_followers = set()
         # self.__login()
@@ -61,6 +58,20 @@ class Instagram(LogsMixin):
 
             self.api.dump_settings(cached_settings)
 
+    def to_ignore(self) -> set:
+        output = set()
+        users = self.fetch_users_from_file("to_ignore.txt")
+        for u in users:
+            try:
+                u = int(u)
+            except ValueError:
+                pass
+            finally:
+                output.add(u)
+
+        return output
+
+
     def custom_settings(self):
         """Creates custom device settings for client if provided."""
         if UserSettings:
@@ -94,29 +105,22 @@ class Instagram(LogsMixin):
         # self.api.user_id_from_username()
         pass
 
-
-    def fetch_followers(self, target_account: int, all_=False) -> list:
+    def fetch_followers(self, user_id: int, all_=False) -> list:
         """Grabs followers from target account."""
-        users = self.api.user_followers(user_id=target_account, amount=50)
-        output = []
-        for user in users:
-            if self.follow_conditions(users[user]):
-                output.append(users[user])
 
-        print("Number of eligible users: {}".format(len(output)))
-
-        return output
 
     def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
-
 
     def unfollow_user(self, user_id: int) -> bool:
         """Unfollow IG User by username."""
 
 
-    def fetch_posts(self, username, max_posts=12, step=1):
+    def fetch_posts(self, user_id: int, max_posts=12, step=1):
         """Fetch User's posts."""
+        media = self.api.user_medias(user_id=user_id, amount=max_posts)
+
+        return media[::step]
 
 
     # TODO not fully functional yet
@@ -127,12 +131,11 @@ class Instagram(LogsMixin):
     def follow_conditions(self, account: UserShort) -> bool:
         """Checks against conditions in order to follow the account."""
 
-        # Account can't be private
         if account.is_private:
             return False
-        # Account can't have anonymous profile picture
         # elif account["has_anonymous_profile_picture"]:
         #     return False
+
         # Account was interacted with in the past already
         elif account.username in self.to_ignore:
             return False
@@ -144,11 +147,12 @@ class Instagram(LogsMixin):
 
 if __name__ == "__main__":
     ig = Instagram()
-    ig.login()
-
-    # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
-
+    # ig.login()
+    #
+    # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
+    #
     # user_id = ig.api.user_id_from_username("soulhoe")
+    #
     # users = ig.fetch_followers(user_id)
     # print(users)
-
+    print(ig.ignored_users)

@@ -1,4 +1,4 @@
-/logs/
+/modules/logs/
 /test/ig_credentials.json
 /to_scrape.txt
 /.env
