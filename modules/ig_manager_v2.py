@@ -104,8 +104,20 @@ class Instagram(LogsMixin):
         # self.api.user_id_from_username()
         pass
 
-    def fetch_followers(self, user_id: int, all_=False) -> list:
+    def fetch_followers(self, user_id: int, all_=False, amount: int = 50) -> list:
         """Grabs followers from target account."""
+        # Get first batch of users
+        selected_users = []
+        max_id = ""
+        while len(selected_users) < amount:
+            r = self.api.user_followers_v1_chunk(user_id, max_amount=100, max_id=max_id)
+            users = r[0]
+            max_id = r[1]
+            for u in users:
+                if self.follow_conditions(u) and u not in selected_users:
+                    selected_users.append(u)
+
+
 
     def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
