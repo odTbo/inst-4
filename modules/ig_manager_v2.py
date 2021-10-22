@@ -130,13 +130,13 @@ class Instagram(LogsMixin):
             users = r[0] # List of users from tuple
             max_id = r[1] # result's max_id from tuple
 
-            assert len(users) != 0, "Didn't find any followers"
+            # assert len(users) != 0, "Didn't find any followers"
 
             for u in users:
                 if u not in selected_users and (self.follow_conditions(u) or all_):
                     selected_users.append(u)
 
-                if len(selected_users) == amount and not all_: # (and not all_) to grab all followers
+                if len(selected_users) == amount and not all_:
                     return selected_users
 
             if not max_id:
