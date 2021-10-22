@@ -126,8 +126,10 @@ class Instagram(LogsMixin):
         selected_users = []
         max_id = ""
         while len(selected_users) < amount or all_:
-            r = self.api.user_followers_v1_chunk(user_id, max_amount=50, max_id=max_id)
+            r = self.api.user_followers_v1_chunk(user_id, max_amount=100, max_id=max_id)
             users = r[0] # List of users from tuple
+            num_users = len(users)
+
             max_id = r[1] # result's max_id from tuple
 
             # assert len(users) != 0, "Didn't find any followers"
@@ -138,6 +140,8 @@ class Instagram(LogsMixin):
 
                 if len(selected_users) == amount and not all_:
                     return selected_users
+            num_selected_users = len(selected_users)
+            print(num_users, num_selected_users)
 
             if not max_id:
                 return selected_users
@@ -176,13 +180,17 @@ class Instagram(LogsMixin):
 if __name__ == "__main__":
     ig = Instagram()
     ig.login()
-    user_id = ig.api.user_id_from_username("painfully.mistaken")
-    users = ig.fetch_followers(user_id)
-    print("Not all: " + str(len(users)))
-    print("Timeout: " + str(timeout()))
+    user_id = ig.api.user_id_from_username("username")
+    # users = ig.fetch_followers(user_id)
+    # print("Not all: " + str(len(users)))
+    # print("Timeout: " + str(timeout()))
 
-    users = ig.fetch_followers(user_id, all_=True)
+    users = ig.fetch_followers(user_id, amount=69)
     print("All: " + str(len(users)))
+    print(users)
+
+    for u in users:
+        assert not u.is_private, "PRIVATE ACCOUNT: ".format(u)
 
     #
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
