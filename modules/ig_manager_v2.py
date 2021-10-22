@@ -105,27 +105,42 @@ class Instagram(LogsMixin):
         pass
 
     def fetch_followers(self, user_id: int, all_=False, amount: int = 80) -> list:
-        """Grabs followers from target account."""
+        """
+        Grabs followers from target account.
+
+        Parameters
+        ------
+        user_id: int
+            User id of an instagram account.
+        all_: bool
+            True to fetch all followers.
+        amount: int
+            Specify the amount of followers you want to fetch.
+
+        Returns
+        ------
+        List[UserShort]
+            List of objects of User type
+        """
         # Get first batch of users
         selected_users = []
         max_id = ""
-        while len(selected_users) < amount:
-            r = self.api.user_followers_v1_chunk(user_id, max_amount=100, max_id=max_id)
+        while len(selected_users) < amount or all_:
+            r = self.api.user_followers_v1_chunk(user_id, max_amount=50, max_id=max_id)
             users = r[0] # List of users from tuple
             max_id = r[1] # result's max_id from tuple
 
             assert len(users) != 0, "Didn't find any followers"
 
             for u in users:
-                if self.follow_conditions(u) and u not in selected_users:
+                if u not in selected_users and (self.follow_conditions(u) or all_):
                     selected_users.append(u)
 
-                if len(selected_users) == amount:
+                if len(selected_users) == amount and not all_: # (and not all_) to grab all followers
                     return selected_users
 
             if not max_id:
                 return selected_users
-
 
     def follow_user(self, user_id: int) -> None:
         """Follow IG User by username."""
@@ -161,10 +176,14 @@ class Instagram(LogsMixin):
 if __name__ == "__main__":
     ig = Instagram()
     ig.login()
-    user_id = ig.api.user_id_from_username("soulhoe")
+    user_id = ig.api.user_id_from_username("painfully.mistaken")
     users = ig.fetch_followers(user_id)
-    print(len(users))
-    print(users)
+    print("Not all: " + str(len(users)))
+    print("Timeout: " + str(timeout()))
+
+    users = ig.fetch_followers(user_id, all_=True)
+    print("All: " + str(len(users)))
+
     #
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
     #
