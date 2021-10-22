@@ -181,18 +181,16 @@ if __name__ == "__main__":
     ig = Instagram()
     ig.login()
     user_id = ig.api.user_id_from_username("username")
-    # users = ig.fetch_followers(user_id)
-    # print("Not all: " + str(len(users)))
-    # print("Timeout: " + str(timeout()))
 
     users = ig.fetch_followers(user_id, amount=69)
-    print("All: " + str(len(users)))
-    print(users)
 
     for u in users:
         assert not u.is_private, "PRIVATE ACCOUNT: ".format(u)
 
-    #
+    print("All: " + str(len(users)))
+    print(users)
+
+
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
     #
     # user_id = ig.api.user_id_from_username("soulhoe")
