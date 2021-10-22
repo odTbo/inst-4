@@ -122,6 +122,12 @@ class Instagram(LogsMixin):
         List[UserShort]
             List of objects of User type
         """
+        if all_:
+            r = self.api.user_followers_v1_chunk(user_id)
+            users = r[0]  # List of users from tuple
+            print(len(users))
+            return users
+
         # Get first batch of users
         selected_users = []
         max_id = ""
@@ -180,15 +186,14 @@ class Instagram(LogsMixin):
 if __name__ == "__main__":
     ig = Instagram()
     ig.login()
-    user_id = ig.api.user_id_from_username("username")
+    # user_id = ig.api.user_id_from_username("username")
 
-    users = ig.fetch_followers(user_id, amount=69)
-
-    for u in users:
-        assert not u.is_private, "PRIVATE ACCOUNT: ".format(u)
-
-    print("All: " + str(len(users)))
-    print(users)
+    # users = ig.fetch_followers(user_id, all_=True)
+    #
+    # for u in users:
+    #     assert not u.is_private, "PRIVATE ACCOUNT: ".format(u)
+    # print("All: " + str(len(users)))
+    # print(users)
 
 
     # # print("x-bloks-version-id: ", ig.api.bloks_versioning_id)
