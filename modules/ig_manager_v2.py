@@ -131,23 +131,19 @@ class Instagram(LogsMixin):
         # Get first batch of users
         selected_users = []
         max_id = ""
-        while len(selected_users) < amount or all_:
+        while len(selected_users) < amount:
             r = self.api.user_followers_v1_chunk(user_id, max_amount=100, max_id=max_id)
             users = r[0] # List of users from tuple
-            num_users = len(users)
-
             max_id = r[1] # result's max_id from tuple
 
             # assert len(users) != 0, "Didn't find any followers"
 
             for u in users:
-                if u not in selected_users and (self.follow_conditions(u) or all_):
+                if u not in selected_users and self.follow_conditions(u):
                     selected_users.append(u)
 
-                if len(selected_users) == amount and not all_:
+                if len(selected_users) == amount:
                     return selected_users
-            num_selected_users = len(selected_users)
-            print(num_users, num_selected_users)
 
             if not max_id:
                 return selected_users
