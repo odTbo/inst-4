@@ -170,9 +170,6 @@ class Inst4(Instagram, ScraperMixin):
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_list)
 
-<<<<<<< HEAD
-    def follow_method(self, like_posts: bool = True):
-=======
     def unfollow_method(self):
         """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
         to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
@@ -228,7 +225,6 @@ class Inst4(Instagram, ScraperMixin):
             self.remove_finished_file(filename=self.expired_list)
 
     def follow_method(self):
->>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
         """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
         # Fetch accounts to follow
         target_user_id = self.api.user_id_from_username(self.target_account)
@@ -264,15 +260,9 @@ class Inst4(Instagram, ScraperMixin):
                 self.actions["follow"] += 1
 
                 # Like users posts
-<<<<<<< HEAD
-                posts = self.fetch_posts(user["pk"], step=3)
-                if posts and like_posts:
-                    print(f"Liking posts for {user['username']}.")
-=======
                 posts = self.fetch_posts(user.pk, step=3)
                 if posts:
                     print(f"Liking posts for {user.username}.")
->>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
                     for post in posts:
                         try:
                             self.api.media_like(post.id)
@@ -295,14 +285,12 @@ if __name__ == "__main__":
     print(ig.api.user_agent)
     ig.session()
 
-<<<<<<< HEAD
     # REELS MEDIA DOWNLOAD
     # user_id = ig.get_user_id("sxphieroemer")
     # reels = ig.api.user_story_feed(user_id)["reel"]["items"]
     # urls = ig.extract_urls(reels)
     # ig.dwnld_imgs("sxphieroemer", urls)
 
-=======
 
     # EDIT CAPTION
     # posts = ig.fetch_posts(ig.username)
@@ -313,7 +301,6 @@ if __name__ == "__main__":
     # print(r)
 
     # print(ig.api.username_info(""))
->>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
     # DOWNLOAD SAVED FEED (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
