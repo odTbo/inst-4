@@ -115,61 +115,6 @@ class Inst4(Instagram, ScraperMixin):
         print("Downloading media...")
         self.dwnld_imgs(username, urls)
 
-    # LEGACY
-    def _unfollow_method(self):
-        """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
-        to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
-
-        # While there are users to unfollow
-        while len(to_unfollow_list) != 0:
-
-            # Get the first id from the list
-            user = to_unfollow_list[0]
-
-            # Reached user set limit
-            if self.actions["unfollow"] == ACTIONS_LIMIT:
-                print(f"Reached session actions limit.")
-                # Save the rest of users to original file
-                self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
-                break
-
-            # User is not a follower
-            elif user not in self.my_followers:
-                try:
-                    # Unfollow
-                    if self.unfollow_user(user):
-                        self.actions["unfollow"] += 1
-                        timeout()
-                        # Successful unfollow
-                        to_unfollow_list.remove(user)
-
-                    # Actions limited by instagram
-                    else:
-                        # Save the rest of users to original file
-                        self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
-                        print("Error unfollowing, exiting.")
-                        break
-
-                # Internal API errors
-                except ClientError as e:
-                    # error_msg = f"UNFOLLOW ERROR {e} {user}"
-                    error_msg = {
-                        "method": self.method,
-                        "user": user,
-                        "error": str(e)
-                    }
-                    print(error_msg)
-                    self.errors.append(error_msg)
-                    to_unfollow_list.remove(user)
-
-            # User follows back
-            else:
-                to_unfollow_list.remove(user)
-
-        # Remove the source file if it's empty
-        if len(to_unfollow_list) == 0:
-            self.remove_finished_file(filename=self.expired_list)
-
     def unfollow_method(self):
         """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
         to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
@@ -192,6 +137,7 @@ class Inst4(Instagram, ScraperMixin):
                 try:
                     # Unfollow
                     if self.api.user_unfollow(user):
+                        print("Unfollowed {}".format(self.api.username_from_user_id(user)))
                         self.actions["unfollow"] += 1
                         timeout()
                         # Successful unfollow
