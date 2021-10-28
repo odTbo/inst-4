@@ -1,6 +1,5 @@
 from modules.utils import *
 from modules.logs_manager import LogsMixin
-from dotenv import load_dotenv
 from modules.constants import *
 from pathlib import Path
 from instagrapi.types import UserShort
@@ -14,21 +13,19 @@ except ImportError:
     UserSettings = None
     pass
 
-load_dotenv()
-
 
 class Instagram(LogsMixin):
     def __init__(self):
         self.username = getenv("IG_USERNAME")
         self.password = getenv("IG_PASSWORD")
-        # self.target_account = getenv("TARGET_ACCOUNT")
+        self.target_account = getenv("TARGET_ACCOUNT")
         self.settings_filename = "ig_credentials.json"
         self.ignored_users = self.to_ignore()
         self.users = []
         self.my_followers = set()
-        # self.__login()
+        self.__login()
 
-    def login(self):
+    def __login(self):
         """Establishes connection to Instagram API."""
         # get_settings()	            dict	Return settings dict
         # set_settings(settings: dict)	bool	Set session settings
@@ -37,7 +34,7 @@ class Instagram(LogsMixin):
 
         custom_settings = self.custom_settings()
 
-        cached_settings = Path().cwd().parent / "cached_settings.json"
+        cached_settings = Path().cwd() / "cached_settings.json"
 
         # if saved settings, login with saved settings
         if cached_settings.exists():

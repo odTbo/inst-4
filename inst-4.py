@@ -52,7 +52,8 @@ class Inst4(Instagram, ScraperMixin):
                         self.export_username(user, scrape=True)
 
         else:
-            self.my_followers = set(user["pk"] for user in self.fetch_followers(self.username, all_=True))
+            user_id = self.api.user_id_from_username(self.username)
+            self.my_followers = set(user.pk for user in self.fetch_followers(user_id, all_=True))
 
             # Unfollow list ready
             if self.expired_lists():
@@ -226,14 +227,15 @@ class Inst4(Instagram, ScraperMixin):
     def follow_method(self):
         """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
         # Fetch accounts to follow
-        to_follow = self.fetch_followers(self.target_account)
+        target_user_id = self.api.user_id_from_username(self.target_account)
+        to_follow = self.fetch_followers(target_user_id, amount=ACTIONS_LIMIT)
 
         print(f"Num of users to follow: {len(to_follow)}")
 
         for user in to_follow:
             try:
-                self.follow_user(user["pk"])
-                print(f"Followed user: {user['username']}")
+                self.api.user_follow(user.pk)
+                print(f"Followed user: {user.username}")
 
             except ClientError as e:
                 # error_msg = f"FOLLOW ERROR {e} {user['username']}"
@@ -241,34 +243,34 @@ class Inst4(Instagram, ScraperMixin):
                     "method": self.method,
                     "action": "follow",
                     "user": {
-                        "username": user["username"],
-                        "user_id": user["pk"]
+                        "username": user.username,
+                        "user_id": user.pk
                     },
                     "error": str(e)
                 }
                 self.errors.append(error_msg)
-                self.export_username(user["username"], ignore=True)
+                self.export_username(user.pk, ignore=True)
 
             except ConnectionRefusedError:
-                self.export_username(user["username"], ignore=True)
+                self.export_username(user.pk, ignore=True)
 
             else:
                 timeout()
-                self.export_username(user["pk"], unfollow=True, ignore=True)
+                self.export_username(user.pk, unfollow=True, ignore=True)
                 self.actions["follow"] += 1
 
                 # Like users posts
-                posts = self.fetch_posts(user["pk"], step=3)
+                posts = self.fetch_posts(user.pk, step=3)
                 if posts:
-                    print(f"Liking posts for {user['username']}.")
+                    print(f"Liking posts for {user.username}.")
                     for post in posts:
                         try:
-                            self.api.post_like(post["pk"])
+                            self.api.media_like(post.id)
                         except ClientError as e:
                             error_msg = {
                                 "method": self.method,
                                 "action": "post_like",
-                                "post": post["pk"],
+                                "post": post.id,
                                 "error": str(e)
                             }
                             print(error_msg)
