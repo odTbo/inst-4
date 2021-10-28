@@ -2,7 +2,7 @@ from random import choice
 from datetime import datetime
 
 # Follow/Unfollow actions limit
-ACTIONS_LIMIT = choice(range(2, 4))
+ACTIONS_LIMIT = choice(range(2,4))
 
 # Approximate follows per day
 FOLLOWS_PER_DAY = 70

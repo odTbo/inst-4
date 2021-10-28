@@ -161,7 +161,7 @@ class Inst4(Instagram, ScraperMixin):
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_list)
 
-    def follow_method(self):
+    def follow_method(self, like_posts: bool = True):
         """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
         # Fetch accounts to follow
         to_follow = self.fetch_followers(self.target_account)
@@ -194,7 +194,7 @@ class Inst4(Instagram, ScraperMixin):
 
                 # Like users posts
                 posts = self.fetch_posts(user["pk"], step=3)
-                if posts:
+                if posts and like_posts:
                     print(f"Liking posts for {user['username']}.")
                     for post in posts:
                         try:
@@ -218,12 +218,13 @@ if __name__ == "__main__":
     print(ig.api.user_agent)
     ig.session()
 
-    # print(ig.api.username_info("launchdsigns"))
-    # # Download saved feed (wip)
+    # REELS MEDIA DOWNLOAD
+    # user_id = ig.get_user_id("sxphieroemer")
+    # reels = ig.api.user_story_feed(user_id)["reel"]["items"]
+    # urls = ig.extract_urls(reels)
+    # ig.dwnld_imgs("sxphieroemer", urls)
+
+    # DOWNLOAD SAVED FEED (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)
     # ig.dwnld_imgs(ig.username, urls)
-    # posts = ig.fetch_user_saved(all_=True)
-    # posts = [post['id'] for post in posts]
-    # print(len(posts))
-    # print(posts)
