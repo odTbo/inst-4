@@ -1,16 +1,18 @@
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
-from modules.instagram_manager import Instagram
+# from modules.instagram_manager import Instagram
+from modules.ig_manager_v2 import Instagram
+from instagrapi.exceptions import ClientError
 from modules.utils import timeout
 from dotenv import load_dotenv
 from os import path
 
-try:
-    from instagram_private_api import ClientError
-except ImportError:
-    import sys
-    sys.path.append(path.join(path.dirname(__file__), '..'))
-    from instagram_private_api import ClientError
+# try:
+#     from instagram_private_api import ClientError
+# except ImportError:
+#     import sys
+#     sys.path.append(path.join(path.dirname(__file__), '..'))
+#     from instagram_private_api import ClientError
 
 load_dotenv()
 
@@ -100,7 +102,8 @@ class Inst4(Instagram, ScraperMixin):
         print(f"Scraping profile: {username}")
 
         # Fetch posts
-        posts = self.fetch_posts(username=username, max_posts=download_posts)
+        user_id = self.get_user_id(username)
+        posts = self.fetch_posts(user_id=user_id, max_posts=download_posts)
         print(f"Posts to scrape: {len(posts)}")
 
         # Extract URLs from all posts
@@ -110,6 +113,61 @@ class Inst4(Instagram, ScraperMixin):
         # Download posts
         print("Downloading media...")
         self.dwnld_imgs(username, urls)
+
+    # LEGACY
+    def _unfollow_method(self):
+        """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
+        to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
+
+        # While there are users to unfollow
+        while len(to_unfollow_list) != 0:
+
+            # Get the first id from the list
+            user = to_unfollow_list[0]
+
+            # Reached user set limit
+            if self.actions["unfollow"] == ACTIONS_LIMIT:
+                print(f"Reached session actions limit.")
+                # Save the rest of users to original file
+                self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
+                break
+
+            # User is not a follower
+            elif user not in self.my_followers:
+                try:
+                    # Unfollow
+                    if self.unfollow_user(user):
+                        self.actions["unfollow"] += 1
+                        timeout()
+                        # Successful unfollow
+                        to_unfollow_list.remove(user)
+
+                    # Actions limited by instagram
+                    else:
+                        # Save the rest of users to original file
+                        self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
+                        print("Error unfollowing, exiting.")
+                        break
+
+                # Internal API errors
+                except ClientError as e:
+                    # error_msg = f"UNFOLLOW ERROR {e} {user}"
+                    error_msg = {
+                        "method": self.method,
+                        "user": user,
+                        "error": str(e)
+                    }
+                    print(error_msg)
+                    self.errors.append(error_msg)
+                    to_unfollow_list.remove(user)
+
+            # User follows back
+            else:
+                to_unfollow_list.remove(user)
+
+        # Remove the source file if it's empty
+        if len(to_unfollow_list) == 0:
+            self.remove_finished_file(filename=self.expired_list)
 
     def unfollow_method(self):
         """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
@@ -132,7 +190,7 @@ class Inst4(Instagram, ScraperMixin):
             elif user not in self.my_followers:
                 try:
                     # Unfollow
-                    if self.unfollow_user(user):
+                    if self.api.user_unfollow(user):
                         self.actions["unfollow"] += 1
                         timeout()
                         # Successful unfollow
