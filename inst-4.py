@@ -1,16 +1,18 @@
 from modules.profile_scraper import ProfileScraperMixin as ScraperMixin
 from modules.constants import DATE_STR, ACTIONS_LIMIT, FOLLOWS_PER_DAY
-from modules.instagram_manager import Instagram
+# from modules.instagram_manager import Instagram
+from modules.ig_manager_v2 import Instagram
+from instagrapi.exceptions import ClientError
 from modules.utils import timeout
 from dotenv import load_dotenv
 from os import path
 
-try:
-    from instagram_private_api import ClientError
-except ImportError:
-    import sys
-    sys.path.append(path.join(path.dirname(__file__), '..'))
-    from instagram_private_api import ClientError
+# try:
+#     from instagram_private_api import ClientError
+# except ImportError:
+#     import sys
+#     sys.path.append(path.join(path.dirname(__file__), '..'))
+#     from instagram_private_api import ClientError
 
 load_dotenv()
 
@@ -28,6 +30,10 @@ class Inst4(Instagram, ScraperMixin):
         self.errors = []
 
     def session(self):
+        """
+        Decides the method for current session.
+        (Scrape/Follow/Unfollow)
+        """
         self.logs_dir_create()
 
         # Bonus image scraper
@@ -46,7 +52,8 @@ class Inst4(Instagram, ScraperMixin):
                         self.export_username(user, scrape=True)
 
         else:
-            self.my_followers = set(user["pk"] for user in self.fetch_followers(self.username, all_=True))
+            user_id = self.api.user_id_from_username(self.username)
+            self.my_followers = set(user.pk for user in self.fetch_followers(user_id, all_=True))
 
             # Unfollow list ready
             if self.expired_lists():
@@ -96,7 +103,8 @@ class Inst4(Instagram, ScraperMixin):
         print(f"Scraping profile: {username}")
 
         # Fetch posts
-        posts = self.fetch_posts(username=username, max_posts=download_posts)
+        user_id = self.get_user_id(username)
+        posts = self.fetch_posts(user_id=user_id, max_posts=download_posts)
         print(f"Posts to scrape: {len(posts)}")
 
         # Extract URLs from all posts
@@ -107,7 +115,8 @@ class Inst4(Instagram, ScraperMixin):
         print("Downloading media...")
         self.dwnld_imgs(username, urls)
 
-    def unfollow_method(self):
+    # LEGACY
+    def _unfollow_method(self):
         """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
         to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
 
@@ -161,17 +170,76 @@ class Inst4(Instagram, ScraperMixin):
         if len(to_unfollow_list) == 0:
             self.remove_finished_file(filename=self.expired_list)
 
+<<<<<<< HEAD
     def follow_method(self, like_posts: bool = True):
+=======
+    def unfollow_method(self):
+        """Unfollow ACTIONS_LIMIT number of users from the expired unfollow list."""
+        to_unfollow_list = [int(user_id) for user_id in self.fetch_users_from_file(self.expired_list)]
+
+        # While there are users to unfollow
+        while len(to_unfollow_list) != 0:
+
+            # Get the first id from the list
+            user = to_unfollow_list[0]
+
+            # Reached user set limit
+            if self.actions["unfollow"] == ACTIONS_LIMIT:
+                print(f"Reached session actions limit.")
+                # Save the rest of users to original file
+                self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
+                break
+
+            # User is not a follower
+            elif user not in self.my_followers:
+                try:
+                    # Unfollow
+                    if self.api.user_unfollow(user):
+                        self.actions["unfollow"] += 1
+                        timeout()
+                        # Successful unfollow
+                        to_unfollow_list.remove(user)
+
+                    # Actions limited by instagram
+                    else:
+                        # Save the rest of users to original file
+                        self.export_to_unfollow(to_unfollow_list, filename=self.expired_list)
+                        print("Error unfollowing, exiting.")
+                        break
+
+                # Internal API errors
+                except ClientError as e:
+                    # error_msg = f"UNFOLLOW ERROR {e} {user}"
+                    error_msg = {
+                        "method": self.method,
+                        "user": user,
+                        "error": str(e)
+                    }
+                    print(error_msg)
+                    self.errors.append(error_msg)
+                    to_unfollow_list.remove(user)
+
+            # User follows back
+            else:
+                to_unfollow_list.remove(user)
+
+        # Remove the source file if it's empty
+        if len(to_unfollow_list) == 0:
+            self.remove_finished_file(filename=self.expired_list)
+
+    def follow_method(self):
+>>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
         """Follow and like post's of followers from .env/TARGET_ACCOUNT."""
         # Fetch accounts to follow
-        to_follow = self.fetch_followers(self.target_account)
+        target_user_id = self.api.user_id_from_username(self.target_account)
+        to_follow = self.fetch_followers(target_user_id, amount=ACTIONS_LIMIT)
 
         print(f"Num of users to follow: {len(to_follow)}")
 
         for user in to_follow:
             try:
-                self.follow_user(user["pk"])
-                print(f"Followed user: {user['username']}")
+                self.api.user_follow(user.pk)
+                print(f"Followed user: {user.username}")
 
             except ClientError as e:
                 # error_msg = f"FOLLOW ERROR {e} {user['username']}"
@@ -179,31 +247,40 @@ class Inst4(Instagram, ScraperMixin):
                     "method": self.method,
                     "action": "follow",
                     "user": {
-                        "username": user["username"],
-                        "user_id": user["pk"]
+                        "username": user.username,
+                        "user_id": user.pk
                     },
                     "error": str(e)
                 }
                 self.errors.append(error_msg)
-                self.export_username(user["username"], ignore=True)
+                self.export_username(user.pk, ignore=True)
+
+            except ConnectionRefusedError:
+                self.export_username(user.pk, ignore=True)
 
             else:
                 timeout()
-                self.export_username(user["pk"], unfollow=True, ignore=True)
+                self.export_username(user.pk, unfollow=True, ignore=True)
                 self.actions["follow"] += 1
 
                 # Like users posts
+<<<<<<< HEAD
                 posts = self.fetch_posts(user["pk"], step=3)
                 if posts and like_posts:
                     print(f"Liking posts for {user['username']}.")
+=======
+                posts = self.fetch_posts(user.pk, step=3)
+                if posts:
+                    print(f"Liking posts for {user.username}.")
+>>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
                     for post in posts:
                         try:
-                            self.api.post_like(post["pk"])
+                            self.api.media_like(post.id)
                         except ClientError as e:
                             error_msg = {
                                 "method": self.method,
                                 "action": "post_like",
-                                "post": post["pk"],
+                                "post": post.id,
                                 "error": str(e)
                             }
                             print(error_msg)
@@ -218,12 +295,25 @@ if __name__ == "__main__":
     print(ig.api.user_agent)
     ig.session()
 
+<<<<<<< HEAD
     # REELS MEDIA DOWNLOAD
     # user_id = ig.get_user_id("sxphieroemer")
     # reels = ig.api.user_story_feed(user_id)["reel"]["items"]
     # urls = ig.extract_urls(reels)
     # ig.dwnld_imgs("sxphieroemer", urls)
 
+=======
+
+    # EDIT CAPTION
+    # posts = ig.fetch_posts(ig.username)
+    # post = posts[1]
+    # caption = post["caption"]["text"]
+    # caption += "hashtag"
+    # r = ig.api.edit_media(media_id=post["pk"], caption=caption)
+    # print(r)
+
+    # print(ig.api.username_info(""))
+>>>>>>> d283186aed59ee01335ba1c9ec634e5ec06163d6
     # DOWNLOAD SAVED FEED (wip)
     # posts = ig.fetch_user_saved(max_posts=10)
     # urls = ig.extract_urls(posts)

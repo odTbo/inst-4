@@ -1,9 +1,15 @@
-certifi==2021.5.30
+certifi==2021.10.8
 charset-normalizer==2.0.4
 dload==0.6
 idna==3.2
 instagram-private-api==1.6.0.0
+instagrapi==1.15.3
 progressbar==2.5
+pycryptodomex==3.9.9
+pydantic==1.8.2
+PySocks==1.7.1
 python-dotenv==0.19.0
 requests==2.26.0
-urllib3==1.26.6
+typing-extensions==3.10.0.2
+urllib3==1.26.7
+Pillow>=8.1.1
